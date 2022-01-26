@@ -16,6 +16,7 @@ library(sjPlot)
 library(emmeans)
 library(MuMIn)
 library(mgcv)
+
  
 setwd("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Salmon/Big Bar Rockslide /prep REPORT post WORK/EXCEL and CSV files/")
 
@@ -214,7 +215,7 @@ write.csv(file="./Exported data/Kraskura_summary_Allnumeric.csv", data_sum2, row
 
 data_split_test<-split(data, data$Test_performance2)
 
-# all but Atlatic salmon and trout; North America
+# all but Atlantic salmon and trout; North America
 target1<-data[-c(which(data$Species_latin == "Salmo salar" | data$Species_latin == "Oncorhynchus mykiss")),]
 length(unique(target1$Reference_number_1)) # 52 studies, 1165 dp
 nrow(target1)
