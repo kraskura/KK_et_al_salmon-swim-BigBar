@@ -1,6 +1,6 @@
 
 # library(metafor)
-pkgs <- c("mgcv", "lme4", "ggplot2", "vroom", "dplyr", "forcats", "tidyr")
+pkgs <- c("mgcv", "lme4", "ggplot2", "vroom", "dplyr", "forcats", "tidyr", "forestplot", "meta")
 vapply(pkgs, library, logical(1), character.only = TRUE, logical.return = TRUE,
        quietly = TRUE)
 # *************************
@@ -16,13 +16,13 @@ source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/table
 data.all<-get.adult.salmonid.swim.data(
   data.file = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/2022_final_work/Kraskura_salmonSwim_analysis_jan2022.csv")
 
-# all but time to fatigue tests for general analysis:
-
-data<-as.data.frame(data.all[1])
-data<-data[!c(data$Test_performance2=="TTF"),]
-
 # available datasets:
 # return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
+
+# all but time to fatigue tests for general analysis:
+data<-as.data.frame(data.all[1])
+data<-data[!c(data$Test_performance2=="TTF"),]
+data.ttf<-data[c(data$Test_performance2=="TTF"),]
 
 data$Species_latin<-as.factor(data$Species_latin)
 data$Sex_F_M<-as.factor(data$Sex_F_M)
@@ -167,14 +167,22 @@ wi.all <- 1/sqrt(dat.cm$vi[c(dat.cm$N_swim_speed!=1 & !is.na(dat.cm$N_swim_speed
 wi.min <- min(wi.all, na.rm = T)
 wi.max <-max(wi.all, na.rm = T) 
 # << size for the plot ta show this 
+dat.cm$anaerob<-0
 
 for(i in 1:nrow(dat.cm)){
   if(dat.cm$N_swim_speed[i]!=1 & !is.na(dat.cm$vi[i])){
     wi <- 1/sqrt(dat.cm$vi[i])
     dat.cm$size[i] <- 0.5 + 1.2 * (wi - wi.min)/(wi.max - wi.min) 
-    print(c(wi, (0.5 + 1.2 * (wi - wi.min)/(wi.max - wi.min) )))# << size for the plot ta show this 
+    # print(c(wi, (0.5 + 1.2 * (wi - wi.min)/(wi.max - wi.min) )))# << size for the plot ta show this 
   }else{
     dat.cm$size[i] <- 0.5
+  }
+  
+  if(!is.na(dat.cm$LENGTH_cm[i])){
+    if((dat.cm$SWIM_cms[i] / dat.cm$LENGTH_cm[i]) >= 2){
+      dat.cm$anaerob[i]<- 1
+      print((dat.cm$SWIM_cms[i] / dat.cm$LENGTH_cm[i]))
+    }
   }
 }
 
@@ -186,6 +194,7 @@ dat.cm$Species_latin2<-as.character(dat.cm$Species_latin)
 dat.cm$Species_latin2[which(dat.cm$Species_latin == "Oncorhynchus masou" | dat.cm$Species_latin == "Oncorhynchus spp.")]<-"Mixed species"
 dat.cm$Species_latin2<-factor(dat.cm$Species_latin2)
 # nrow(dat.cm[!is.na(dat.cm$SWIM_cms_SD),])
+# is predicted > 2 BL/s = 
 
 dat.cm<-dat.cm %>% 
   mutate(xi = reorder(xi, -yi))
@@ -211,6 +220,7 @@ ggplot(data=dat.cm, aes(x = xi, y = yi, size = size, shape = Species_latin))+
   geom_point(data =  subset(dat.cm[dat.cm$SWIM_cms_source == "reported",], !is.na(Species_latin)), aes(col=Temp_test_mean, fill=Temp_test_mean),  stroke=0.5, show.legend = FALSE)+
   scale_shape_manual(breaks = c("Oncorhynchus masou", "Oncorhynchus spp.", "Oncorhynchus keta", "Oncorhynchus tshawytscha", 
                                 "Oncorhynchus gorbuscha", "Oncorhynchus kisutch", "Oncorhynchus mykiss",  "Oncorhynchus nerka","Salmo salar"), values= c(25, 23, 21, 21, 21, 21, 21, 21, 21))+
+  geom_point(data = subset(dat.cm[dat.cm$anaerob == 1,], !is.na(Species_latin)), mapping = aes(x = xi, y = anaerob), pch="-", color = "black", fill = "white", size = 2, alpha= 0.9)+
   xlab('')+ 
   ylim(0, 800)+
   ylab(expression(Swim[Abs]~speed~(cm/s)))+
@@ -232,8 +242,7 @@ ggplot(data=dat.cm, aes(x = xi, y = yi, size = size, shape = Species_latin))+
         strip.text.x = element_blank())+
   coord_flip()
 
-
-ggplot(data=dat.cm, aes(x = xi, y = yi, size=size))+
+ggplot(data=dat.BL, aes(x = xi, y = yi, size=size))+
   geom_hline(yintercept =200, linetype=2, col = "black", lwd=0.1)+
   geom_errorbar(data = (dat.cm[!is.na(dat.cm$SWIM_cms_SD),]), mapping = aes(ymin = yi-(SWIM_cms_SD), ymax = yi+(SWIM_cms_SD), col=Temp_test_mean, size =1), size = 0.5, width = 0.5)+
   geom_point(data = subset(dat.cm[dat.cm$SWIM_cms_source == "estimated",], !is.na(Species_latin)) , mapping = aes(x = xi, y = yi, color = Temp_test_mean), fill = "white", stroke=0.5)+
@@ -306,33 +315,60 @@ ggplot(data=dat.BL, aes(x = xi, y = yi,  size = size))+
         strip.text.y = element_text(hjust=0,vjust = 1,angle=180,face="bold.italic"),
         legend.position = "left", 
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())+
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())+
   coord_flip()
 
+ggplot(data=dat.BL, aes(x = as.numeric(xi), y = yi, size=size))+
+  geom_errorbar(data = (dat.BL[!is.na(dat.BL$swim_error_BLs_SD),]), mapping = aes(x = as.numeric(xi), ymin = yi-(swim_error_BLs_SD), ymax = yi+(swim_error_BLs_SD), col=Temp_test_mean, size =1), size = 0.5, width = 0.5)+
+  geom_hline(yintercept =2, linetype=2, col = "black", lwd=0.1)+
+  geom_point(data = subset(dat.BL, !is.na(Species_latin)) , mapping = aes(x = as.numeric(xi), y = yi, color = Temp_test_mean), fill = "white", stroke=0.5)+
+  geom_point(data =  subset(dat.BL, !is.na(Species_latin)), aes(col=Temp_test_mean, fill=Temp_test_mean),  stroke=0.5, show.legend = FALSE)+
+  xlab('')+ 
+  ylim(0, 5)+
+  ylab(expression(Swim[Relativ]~speed~(BL/s)))+
+  scale_color_viridis_c()+
+  scale_fill_viridis_c()+
+  theme_bw()+
+  # ylim(0, 300)+
+  theme(plot.title=element_text(size=16,face="bold"),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x=element_text(face="bold"),
+        axis.title=element_text(size=12,face="bold"),
+        strip.text.y = element_text(hjust=0,vjust = 1,angle=180,face="bold.italic"),
+        legend.position = "left", 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())+
+  coord_flip()
 
-
-
-forest(dat.cm$yi, dat.cm$vi,
-       xlim=c(-2.5,3.5),      ### adjust horizontal plot region limits
-       order="obs",             ### order by size of yi
-       slab=NA, annotate=FALSE, ### remove study labels and annotations
-       efac=0,                  ### remove vertical bars at end of CIs
-       pch=19,                  ### changing point symbol to filled circle
-       col="gray40",            ### change color of points/CIs
-       psize=5, 
-       # cex=0.5, ### increase point size
-       cex.lab=1, cex.axis=1,   ### increase size of x-axis title/labels
-       lty=c("solid","blank"))  ### remove horizontal line at top of plot
-### draw points one more time to make them easier to see
-
-
-
-
-
-
-
-
-
+ggplot(data=dat.BL, aes(x = xii, y = yi, size=size))+
+  geom_hline(yintercept =2, linetype=2, col = "black", lwd=0.1)+
+  geom_errorbar(data = (dat.BL[!is.na(dat.BL$swim_error_BLs_SD),]), mapping = aes(ymin = yi-(swim_error_BLs_SD), ymax = yi+(swim_error_BLs_SD), col=Temp_test_mean, size =1), size = 0.5, width = 0.5)+
+  geom_point(data = subset(dat.BL, !is.na(Species_latin)) , mapping = aes(x = xii, y = yi, color = Temp_test_mean), fill = "white", stroke=0.5)+
+  geom_point(data =  subset(dat.BL, !is.na(Species_latin)), aes(col=Temp_test_mean, fill=Temp_test_mean),  stroke=0.5, show.legend = FALSE)+
+  xlab('')+ 
+  ylim(0, 800)+
+  ylab(expression(Swim[Relat]~speed~(cm/s)))+
+  scale_color_viridis_c()+
+  scale_fill_viridis_c()+
+  theme_bw()+
+  # ylim(0, 300)+
+  theme(plot.title=element_text(size=16,face="bold"),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x=element_text(face="bold"),
+        axis.title=element_text(size=12,face="bold"),
+        strip.text.y = element_text(hjust=0,vjust = 1,angle=180,face="bold.italic"),
+        legend.position = "left", 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank(),
+        strip.text.x = element_blank())+
+  coord_flip()
 
 
 
@@ -454,7 +490,6 @@ ggplot(data = dat.cm, aes(Temp_test_mean, SWIM_cms, size = wi))+
   geom_line(aes(x=Temp_test_mean, y=mod.temp.1.ci.ub), lty = "solid", size = 0.5, color = "grey")+
   theme_classic()+
   facet_wrap(.~Species_latin)
-
 
 
 

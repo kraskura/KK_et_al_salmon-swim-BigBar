@@ -53,7 +53,7 @@ get.adult.salmonid.swim.data <- function(data.file){
   data$UNIT_swim_error_BLs<-plyr::revalue(data$UNIT_swim_error_BLs, c("se"="SE", "sd"="SD"))
   data$UNIT_swim_error_cm_s<-plyr::revalue(data$UNIT_swim_error_cm_s, c("se"="SE", "sd"="SD"))
   
-  print(data$Species_latin[which(nchar(data$Species_latin) == max(nchar(data$Species_latin)))])
+  # print(data$Species_latin[which(nchar(data$Species_latin) == max(nchar(data$Species_latin)))])
   # data[c(887,888),]  # these are two combined Salmonid species O nerka and O kisutch
   data$Species_latin<-as.character(data$Species_latin)
   data[which(data$Species_latin=="Oncorhynchus gorbuscha "),"Species_latin"]<-"Oncorhynchus gorbuscha"
@@ -152,10 +152,10 @@ get.adult.salmonid.swim.data <- function(data.file){
   pink_b = 3.08 #(2.93 - 3.23)
   coho_a = 0.01120
   coho_b = 3.000
-  sockeye_a1 = 0.01555
-  sockeye_a2 = 0.01922
-  sockeye_a = mean(c(sockeye_a1, sockeye_a2))
-  sockeye_b = 3.000
+  # sockeye_a1 = 0.01555 
+  # sockeye_a2 = 0.01922
+  sockeye_a = mean(0.01555)  # estimated from linear relationship locally 
+  sockeye_b = 2.94
   chum_a = 0.01413 #(0.00734 - 0.02718)
   chum_b = 3.09 #(2.92 - 3.26)
   atlantic_a = 0.01047 #(0.00847 - 0.01294)
@@ -479,7 +479,7 @@ get.adult.salmonid.swim.data <- function(data.file){
                                !is.na(data$SWIM_cms)))] <- "reported"
   
   
-  view(data[which(is.na(data$SWIM_cms_source)),])
+  # view(data[which(is.na(data$SWIM_cms_source)),])
        
   Fieldswim<-data[c(data$Test_performance=="Field"), ]
   Labswim<-data[!c(data$Test_performance=="Field"), ]

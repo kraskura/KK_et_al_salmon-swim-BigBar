@@ -6,7 +6,25 @@ data.all<-get.adult.salmonid.swim.data(
   data.file = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/2022_final_work/Kraskura_salmonSwim_analysis_jan2022.csv")
 
 # view(data)
+# all but time to fatigue tests for general analysis:
 data<-as.data.frame(data.all[1])
+
+# overall data stats:
+# 1. Atlantic and mykiss
+length(which(data$Species_latin == "Salmo salar")) #158
+length(which(data$Species_latin == "Oncorhynchus mykiss")) #136
+# 2. N studies:
+length(unique(data$Reference_number_1))
+nrow(data)
+
+
+# datasets --------
+# data<-data[!c(data$Test_performance2=="TTF"),]
+# data.ttf<-data[c(data$Test_performance2=="TTF"),]
+
+data$Species_latin<-as.factor(data$Species_latin)
+data$Sex_F_M<-as.factor(data$Sex_F_M)
+data$Temp_test_mean<-round(data$Temp_test_mean) # round temp to cluster per degree
 
 # *******************************************
 # how many are estimated? what is estimated:
@@ -16,7 +34,7 @@ length(data$SWIM_cms_source[which(data$SWIM_cms_source=="reported")])
 
 data$length_speed_source<-paste("CM=", data$Length_cm_value_source, "-CM.S=", data$SWIM_cms_source,sep="")
 
-# length estimated, swim speed estimated
+# length estimated, swim speed estimated ------------------------
 est<-data[which(data$Length_cm_value_source == "estimated" &
                   is.na(data$Length_MEAN_cm) & 
                   is.na(data$swim_speed_MEAN_cm_s) &  # <<<<<< 
@@ -36,6 +54,12 @@ rep<-data[which(c(data$Length_cm_value_source == "reported" | data$Length_cm_val
                   !is.na(data$SWIM_cms)) , 
                 c("SWIM_cms", "Size_MEAN_kg", "Length_MEAN_cm", "LENGTH_cm","swim_speed_MEAN_BL_s", "swim_speed_MEAN_cm_s", "Length_cm_value_source" )]
 
+# swim speed reported, length not reported at all
+rep2<-data[which(c(is.na(data$Length_cm_value_source)) &
+                  !is.na(data$swim_speed_MEAN_cm_s)& # <<<<<< 
+                  !is.na(data$SWIM_cms)) , 
+          c("SWIM_cms", "Size_MEAN_kg", "Length_MEAN_cm", "LENGTH_cm","swim_speed_MEAN_BL_s", "swim_speed_MEAN_cm_s", "Length_cm_value_source" )]
+
 # rep2<-data[which(is.na(data$Length_cm_value_source) &
 #                                    is.na(data$swim_speed_MEAN_cm_s)& 
 #                                    !is.na(data$SWIM_cms)), 
@@ -44,49 +68,56 @@ rep<-data[which(c(data$Length_cm_value_source == "reported" | data$Length_cm_val
 total<-data[which(!is.na(data$SWIM_cms)), 
      c("SWIM_cms", "Size_MEAN_kg", "Length_MEAN_cm", "LENGTH_cm", "swim_speed_MEAN_BL_s", "swim_speed_MEAN_cm_s", "Length_cm_value_source" )]
 
-nrow(total) == nrow(est)+nrow(est2)+nrow(rep)
+nrow(total) == nrow(est)+nrow(est2)+nrow(rep)+nrow(rep2)
+
+
+
+
 
 # *******************************************
 
-
-
-
-
-# studies 89 and 9 are too much off in swim estimate performace
 # data.test[c(data.test$Reference_number_1==89 | data.test$Reference_number_1==9), ]
-ggplot(data[c(data$Reference_number_1==89 | data$Reference_number_1==9), ],
-       aes(y = SWIM_cms-swim_speed_MEAN_cm_s, x = LENGTH_cm, label =Reference_number_1 , color = Temp_test_mean))+
-  geom_point()
+# ggplot(data[which(!is.na(data$SWIM_cms)),])+
+#   geom_histogram(mapping = aes(SWIM_cms, fill =length_speed_source ))+
+#   # geom_histogram(mapping = aes(SWIM_cms-swim_speed_MEAN_cm_s), fill = "green3")+
+#   facet_grid(.~length_speed_source)+
+#   theme(legend.position = "top")
 
-ggplot(data[which(!is.na(data$SWIM_cms)),])+
-  geom_histogram(mapping = aes(SWIM_cms, fill =length_speed_source ))+
-  # geom_histogram(mapping = aes(SWIM_cms-swim_speed_MEAN_cm_s), fill = "green3")+
-  facet_grid(.~length_speed_source)+
-  theme(legend.position = "top")
-
-plot_si0<-ggplot(data[which(!is.na(data$SWIM_cms)),])+
-  geom_point(mapping = aes(y = SWIM_cms, x = LENGTH_cm, fill = length_speed_source), pch=21)+
-  # geom_histogram(mapping = aes(SWIM_cms-swim_speed_MEAN_cm_s), fill = "green3")+
-  facet_grid(.~length_speed_source)+
-  geom_text(mapping = aes(y = SWIM_cms, x = LENGTH_cm, label = Reference_number_1), check_overlap = TRUE, size=1)
-ggformat(plot=plot_si0, y_title ="Swim speed, cm/s", x_title = "Body length, cm")
-plot_si0<-plot_si0+theme(legend.position = "top")
-plot_si0
+# plot_si0<-ggplot(data[which(!is.na(data$SWIM_cms)),])+
+#   geom_point(mapping = aes(y = SWIM_cms, x = LENGTH_cm, fill = length_speed_source), pch=21)+
+#   # geom_histogram(mapping = aes(SWIM_cms-swim_speed_MEAN_cm_s), fill = "green3")+
+#   facet_grid(.~length_speed_source)+
+#   geom_text(mapping = aes(y = SWIM_cms, x = LENGTH_cm, label = Reference_number_1), check_overlap = TRUE, size=1)
+# ggformat(plot=plot_si0, y_title ="Swim speed, cm/s", x_title = "Body length, cm")
+# plot_si0<-plot_si0+theme(legend.position = "top")
+# plot_si0
   
-plot_si1<-ggplot(data, aes(y = SWIM_cms, x = swim_speed_MEAN_cm_s, color = Temp_test_mean))+
-  geom_point()+
-  # facet_grid(.~Length_cm_value_source)+
-  geom_abline(slope = 1, intercept = 0)+
-  xlim(0,350)+
-  ylim(0,350)
-ggformat(plot=plot_si1, y_title ="Swim speed (est), cm/s", x_title = "Swim speed (measured), cm/s")
+plot_si1<-ggplot(data[c(data$Species_latin == "Oncorhynchus mykiss" | data$Species_latin == "Oncorhynchus nerka"| data$Species_latin == "Oncorhynchus tshawytscha" | data$Species_latin == "Salmo salar"), ],
+                 aes(y = LENGTH_cm, x = Size_MEAN_kg, color = Length_cm_value_source))+
+  geom_point(pch=21)+
+  scale_color_d3()+
+  facet_wrap(.~Species_latin, nrow = 3)+
+  geom_errorbarh(aes(xmin=Size_MEAN_kg-Size_error_kg,
+                     xmax=Size_MEAN_kg+Size_error_kg), size=0.1)+
+  geom_errorbar(aes(ymin=Length_MEAN_cm-Length_error,
+                    ymax=Length_MEAN_cm+Length_error), size=0.1)
+ggformat(plot=plot_si1, x_title ="Size (kg)", y_title = "Length (cm)")
 
-plot_si2<-ggplot(data[which(!is.na(data$SWIM_cms)),], aes(y = SWIM_cms, x = swim_speed_MEAN_BL_s, color = Temp_test_mean))+
-  geom_point()+
-  facet_grid(.~Length_cm_value_source)+
-  geom_abline(slope = 50, intercept = 0)
-ggformat(plot=plot_si2, y_title ="Swim speed (est), cm/s", x_title = "Swim speed BL/s")
-
+plot_si2<-ggplot(data, aes(y = LENGTH_cm, x = Size_MEAN_kg, color = Length_cm_value_source))+
+  geom_point(pch=21)+
+  scale_color_d3()+
+  geom_errorbarh(aes(xmin=Size_MEAN_kg-Size_error_kg,
+                     xmax=Size_MEAN_kg+Size_error_kg), size=0.1)+
+  geom_errorbar(aes(ymin=Length_MEAN_cm-Length_error,
+                    ymax=Length_MEAN_cm+Length_error), size=0.1)
+ggformat(plot=plot_si2, x_title ="Size (kg)", y_title = "Length (cm)")
+# 
+# plot_si2<-ggplot(data[which(!is.na(data$SWIM_cms)),], aes(y = SWIM_cms, x = swim_speed_MEAN_BL_s, color = Temp_test_mean))+
+#   geom_point()+
+#   facet_grid(.~Length_cm_value_source)+
+#   geom_abline(slope = 50, intercept = 0)
+# ggformat(plot=plot_si2, y_title ="Swim speed (est), cm/s", x_title = "Swim speed BL/s")
+# 
 
 ggplot(data)+
   geom_point(mapping = aes(y = SWIM_cms, x = LENGTH_cm, size = N_morphometrics, alpha = N_swim_speed))+
