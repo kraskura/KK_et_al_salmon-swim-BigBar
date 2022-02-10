@@ -744,10 +744,132 @@ ggplot(data = cond.data.cat ,
   stat_summary(fun.y="mean", geom="line", aes(group=factor(grouping)))
 
 
+# Fish conditions --------------
 
 
+level_order <- c("fallback", "pass", "mature" , "exercise trained","diet" , "infection", "unhealthy",  "prior anesthetic","spawned",  "density", "density exercise trained","toxicant ") #this vector might be useful for other plots/analyses
+
+fish_condBL<-ggplot(data = data[!is.na(data$Fish_Conditions),], aes(y=swim_speed_MEAN_BL_s, fill=Species_latin, x=factor(Fish_Conditions, level = level_order), group = Fish_Conditions))+
+  geom_boxplot(fill = "white", alpha=1, outlier.shape=NA) +
+  geom_point(position=position_jitter(width = 0.2, seed=1002), alpha=1, pch=21, size=2)+
+  scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                   labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                   values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  # scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
+  #                  labels=c("Oncorhynchus spp.", "O. mykiss", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha","O. masou","Salmo salar"))
+  coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgerblue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
+ggformat(fish_condBL, title = "", y_title = "Swim speed (BL/s)", x_title = "", print = F)
+fish_condBL<-fish_condBL + theme( #legend.position = "none")
+                                  legend.title = element_blank(),
+                                  # legend.box = element_rect(fill = "white", colour = "grey30", size=0.5),
+                                  legend.position = c(0.77,0.79),
+                                  legend.text = element_text(face = "italic", size = 14))
+fish_condBL
 
 
+level_order <- c("fallback", "pass", "mature" , "exercise trained","diet" , "infection", "unhealthy",  "prior anesthetic","spawned",  "density", "density exercise trained","toxicant ") #this vector might be useful for other plots/analyses
+
+data$fillFC<-factor(paste(data$Species_latin, data$SWIM_cms_source, sep=""))
+levels.FC<-c("Oncorhynchus gorbuschaestimated", "Oncorhynchus gorbuschaNA" , "Oncorhynchus gorbuschareported",
+"Oncorhynchus ketaestimated", "Oncorhynchus ketaNA","Oncorhynchus ketareported" ,
+"Oncorhynchus kisutchestimated","Oncorhynchus kisutchreported", 
+"Oncorhynchus masouestimated" , "Oncorhynchus masouNA",  
+"Oncorhynchus mykissestimated" , "Oncorhynchus mykissreported",    
+"Oncorhynchus nerkaestimated" ,"Oncorhynchus nerkaNA","Oncorhynchus nerkareported", 
+"Oncorhynchus tshawytschaestimated", "Oncorhynchus tshawytschareported",
+"Salmo salarestimated" ,"Salmo salarreported") 
+fill.FC<-c("#D7D7E5", "black", "#D292CD", "#D7D7E5", "black", "#FB9A62","#D7D7E5", "#FBC063","#D7D7E5",  "black", "#D7D7E5",  "#615B70", "#D7D7E5", "black","#EA573D", "#D7D7E5", "#70Af81","#D7D7E5", "#64B0BC")
+cols.FC<-c("#D292CD", "black", "black",
+           "#FB9A62", "black", "black",
+           "#FBC063", "black",
+           "#446699",  "black",
+           "#615B70",  "black",
+           "#EA573D", "black","black",
+           "#70Af81", "black",
+           "#64B0BC", "black")
+
+fish_condcm<-ggplot(data = data[!is.na(data$Fish_Conditions),], aes(y=SWIM_cms, fill=fillFC, color = fillFC, x=factor(Fish_Conditions, level = level_order), group = Fish_Conditions))+
+  geom_boxplot(fill = "white", alpha=1, outlier.shape=NA, color = "black", show.legend = F) +
+  geom_point(position=position_jitter(width = 0.2, seed=1002), alpha=1, pch=21, size=2, show.legend = FALSE)+
+  # geom_point(data = data[!is.na(data$Fish_Conditions) & data$SWIM_cms_source == "reported",], aes(y=SWIM_cms, fill=Species_latin, x=factor(Fish_Conditions, level = level_order), color = "grey", group = Fish_Conditions))+
+  scale_fill_manual(breaks = levels.FC,
+                     values = fill.FC)+
+  scale_color_manual(breaks = levels.FC,
+                    values = cols.FC)+
+  # scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
+  #                  labels=c("Oncorhynchus spp.", "O. mykiss", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha","O. masou","Salmo salar"))
+  coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgercmue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
+ggformat(fish_condcm, title = "", y_title = "Swim speed (cm/s)", x_title = "", print = F)
+fish_condcm<-fish_condcm + theme( legend.title = element_blank(),
+                                  # legend.box = element_rect(fill = "white", colour = "grey30", size=0.5),
+                                  legend.position = c(0.77,0.79),
+                                  legend.text = element_text(face = "italic", size = 25))
+fish_condcm
+
+cowplot::plot_grid( fish_condcm,fish_condBL,
+                   nrow = 2, ncol=1, 
+                   labels = "AUTO",
+                   label_x = c(0.94),
+                   label_y = c(0.93, 0.93)
+                   ) %>% 
+  ggsave(filename = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Fig7_cms_Fish_Cond.png",
+         width = 8, height = 11,units = "in")
+
+
+# SWIM TESTS --------------
+
+# level_order <- c("fallback", "pass", "mature" , "exercise trained","diet" , "infection", "unhealthy",  "prior anesthetic","spawned",  "density", "density exercise trained","toxicant ") #this vector might be useful for other plots/analyses
+
+test_condBL<-ggplot(data = data[!is.na(data$Test_performance2),], aes(y=swim_speed_MEAN_BL_s, fill=Species_latin, x=factor(Test_performance2), group = Test_performance2))+
+  geom_boxplot(fill = "white", alpha=1, outlier.shape=NA) +
+  geom_point(position=position_jitter(width = 0.2, seed=1002), alpha=1, pch=21, size=2)+
+  scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  # scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
+  #                  labels=c("Oncorhynchus spp.", "O. mykiss", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha","O. masou","Salmo salar"))
+  coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgerblue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
+ggformat(test_condBL, title = "", y_title = "Swim speed (BL/s)", x_title = "", print = F, size_text = 13)
+test_condBL <-test_condBL + theme( #legend.position = "none")
+                                      legend.title = element_blank(),
+                                      # legend.box = element_rect(fill = "white", colour = "grey30", size=0.5),
+                                      legend.position = c(0.71,0.62),
+                                      legend.text = element_text(face = "italic", size = 10.5))
+test_condBL
+
+
+# level_order <- c("fallback", "pass", "mature" , "exercise trained","diet" , "infection", "unhealthy",  "prior anesthetic","spawned",  "density", "density exercise trained","toxicant ") #this vector might be useful for other plots/analyses
+
+test_condcm<-ggplot(data = data[!is.na(data$Test_performance2),], aes(y=SWIM_cms, fill=fillFC, color = fillFC, x=factor(Test_performance2), group = Test_performance2))+
+  geom_boxplot(fill = "white", alpha=1, outlier.shape=NA, color = "black") +
+  geom_point(position=position_jitter(width = 0.2, seed=1002), alpha=1, pch=21, size=2, show.legend = F)+
+  scale_fill_manual(breaks = levels.FC,
+                    values = fill.FC)+
+  scale_color_manual(breaks = levels.FC,
+                     values = cols.FC)+
+  # scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
+  #                  labels=c("Oncorhynchus spp.", "O. mykiss", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha","O. masou","Salmo salar"))
+  coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgercmue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
+ggformat(test_condcm, title = "", y_title = "Swim speed (cm/s)", x_title = "", print = F, size_text = 13)
+test_condcm<-test_condcm + theme( legend.title = element_blank(),
+                                  # legend.box = element_rect(fill = "white", colour = "grey30", size=0.5),
+                                  legend.position = c(0.77,0.79),
+                                  legend.text = element_text(face = "italic", size = 9))
+test_condcm
+
+cowplot::plot_grid( test_condcm,test_condBL,
+                    nrow = 2, ncol=1,
+                    labels = "AUTO",
+                    label_x = c(0.9),
+                    label_y = c(0.89, 0.89)) %>%
+  ggsave(filename = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Fig8_cms_SwimTest.png",
+         width = 5.5, height = 7.5,units = "in")
 
 
 
