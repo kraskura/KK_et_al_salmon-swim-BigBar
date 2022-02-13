@@ -20,6 +20,8 @@ data<-data[!c(data$Test_performance2=="TTF" | -c(data$Species_latin=="Oncorhynch
 data.BL<-data[!is.na(data$swim_speed_MEAN_BL_s),]
 data.cm<-data[!is.na(data$SWIM_cms),]
 
+# return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
+dataF<-as.data.frame(data.all[7])
 
 # estimated anaerobic > 2 BL/s
 data.cm$anaerob<-0
@@ -68,8 +70,68 @@ data.BL.rep$Species_latin2<-factor(data.BL.rep$Species_latin2)
 #   scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
 #                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
 #                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+# *******************************************
+
+# Suppl figs -----------
+# data.test[c(data.test$Reference_number_1==89 | data.test$Reference_number_1==9), ]
+# ggplot(data[which(!is.na(data$SWIM_cms)),])+
+#   geom_histogram(mapping = aes(SWIM_cms, fill =length_speed_source ))+
+#   # geom_histogram(mapping = aes(SWIM_cms-swim_speed_MEAN_cm_s), fill = "green3")+
+#   facet_grid(.~length_speed_source)+
+#   theme(legend.position = "top")
+
+# plot_si0<-ggplot(data[which(!is.na(data$SWIM_cms)),])+
+#   geom_point(mapping = aes(y = SWIM_cms, x = LENGTH_cm, fill = length_speed_source), pch=21)+
+#   # geom_histogram(mapping = aes(SWIM_cms-swim_speed_MEAN_cm_s), fill = "green3")+
+#   facet_grid(.~length_speed_source)+
+#   geom_text(mapping = aes(y = SWIM_cms, x = LENGTH_cm, label = Reference_number_1), check_overlap = TRUE, size=1)
+# ggformat(plot=plot_si0, y_title ="Swim speed, cm/s", x_title = "Body length, cm")
+# plot_si0<-plot_si0+theme(legend.position = "top")
+# plot_si0
+
+plot_si1<-ggplot(data[c(data$Species_latin == "Oncorhynchus mykiss" | data$Species_latin == "Oncorhynchus nerka"| data$Species_latin == "Oncorhynchus tshawytscha" | data$Species_latin == "Salmo salar"), ],
+                 aes(y = LENGTH_cm, x = Size_MEAN_kg, color = Length_cm_value_source))+
+  geom_point(pch=21)+
+  scale_color_d3()+
+  facet_wrap(.~Species_latin, nrow = 3)+
+  geom_errorbarh(aes(xmin=Size_MEAN_kg-Size_error_kg,
+                     xmax=Size_MEAN_kg+Size_error_kg), size=0.1)+
+  geom_errorbar(aes(ymin=Length_MEAN_cm-Length_error,
+                    ymax=Length_MEAN_cm+Length_error), size=0.1)
+ggformat(plot=plot_si1, x_title ="Size (kg)", y_title = "Length (cm)")
+
+plot_si2<-ggplot(data, aes(y = LENGTH_cm, x = Size_MEAN_kg, color = Length_cm_value_source))+
+  geom_point(pch=21)+
+  scale_color_d3()+
+  geom_errorbarh(aes(xmin=Size_MEAN_kg-Size_error_kg,
+                     xmax=Size_MEAN_kg+Size_error_kg), size=0.1)+
+  geom_errorbar(aes(ymin=Length_MEAN_cm-Length_error,
+                    ymax=Length_MEAN_cm+Length_error), size=0.1)
+ggformat(plot=plot_si2, x_title ="Size (kg)", y_title = "Length (cm)")
+# 
+# plot_si2<-ggplot(data[which(!is.na(data$SWIM_cms)),], aes(y = SWIM_cms, x = swim_speed_MEAN_BL_s, color = Temp_test_mean))+
+#   geom_point()+
+#   facet_grid(.~Length_cm_value_source)+
+#   geom_abline(slope = 50, intercept = 0)
+# ggformat(plot=plot_si2, y_title ="Swim speed (est), cm/s", x_title = "Swim speed BL/s")
+# 
+
+ggplot(data)+
+  geom_point(mapping = aes(y = SWIM_cms, x = LENGTH_cm, size = N_morphometrics, alpha = N_swim_speed))+
+  geom_point(mapping = aes(y = swim_speed_MEAN_cm_s, x = LENGTH_cm, size = N_morphometrics, alpha = N_swim_speed), color = "blue")+
+  facet_grid(.~Length_cm_value_source)
+
+# data[which(!is.na(data$Size_kg_estimated) & is.na(data$Size_MEAN_kg)),]
+
+# my_data <- escalc(mi = swim_speed_MEAN_cm_s, sdi =swim_speed_error_cm_s, 
+#                   ni = N_morphometrics,
+#                   data = data.test, measure = "MD")
+
+
 
 # Fig Supl A. --------
+
+
 
 year_trend2<-ggplot(data = data[!duplicated(data[,c('Reference_number_1')]),], aes(as.numeric(as.character(Year_published))))+
   # geom_point(position=position_jitter(width=0.2), alpha=1, colour="grey3", pch=21, size=2)+
@@ -675,7 +737,6 @@ swim_test.cm<-swim_test.cm +
         legend.position = "none")
 swim_test.cm
 
-
 swim_test.BL<-ggplot(data = data.BL,
                         aes(y=swim_speed_MEAN_BL_s, fill=Species_latin, x=Test_performance2, color = Species_latin, group = Test_performance2))+
   geom_hline(yintercept = 2, lwd =0.2, color = "black", lty=2)+
@@ -715,15 +776,25 @@ dev.off()
 
 library("PerformanceAnalytics")
 
-cond.data.cont <- data[, c("SWIM_cms", "LENGTH_cm", "Water_flows_cm_s", "Water_flows_m_3_s",
+cond.data.cont <- data[, c("SWIM_cms", "LENGTH_cm",  "Water_flows_cm_s",#
                     "GSI_MEAN", "Temp_test_mean", "Gonad_g")]
+cond.data.contBL <- data[, c("swim_speed_MEAN_BL_s", "LENGTH_cm",  "Water_flows_cm_s", "Water_flows_m_3_s",
+                           "GSI_MEAN", "Temp_test_mean", "Gonad_g")]
 cond.data.cont[] <- lapply(cond.data.cont, function(x) as.numeric(as.character(x)))
 
 cond.data.cat <- data[, c("SWIM_cms", "LENGTH_cm","Temp_test_mean",
                           "Mortality", "Surgery", "Swim_Conditions2",
                           "Species_latin", "Blood","Recovery", "Fish_Conditions")]
 chart.Correlation(cond.data.cont,  pch=19, na.action = na.omit)
-plot(cond.data.cont)
+chart.Correlation(cond.data.cont,  pch=19, na.action = na.omit)
+
+
+png("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/FigSI_correll.png",res =300, width = 10, units = "in", height = 10)
+    plot(cond.data.cont)
+dev.off()
+png("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/FigSI_correllBL.png",res =300, width = 10, units = "in", height = 10)
+  plot(cond.data.contBL)
+dev.off()
 
 ggplot(data = cond.data.cat ,
        aes(y=SWIM_cms, x = Recovery,
@@ -873,7 +944,53 @@ cowplot::plot_grid( test_condcm,test_condBL,
 
 
 
+# field studies ---------
+dataF<-as.data.frame(data.all[7])
+for ( i in 1:nrow(dataF)){
+  if(!dataF$Mortality[i]==0){
+    Mortality<-"Mortality"
+  }else{
+    Mortality<-""
+  }
+  
+  if(!dataF$Recovery[i]==0){
+    Recovery<-paste("Recov: ", dataF$Recovery[i], sep="")
+  }else{
+    Recovery<-""
+  }
+  
+  if(!is.na(dataF$Fish_Conditions[i])){
+    Fish_Conditions<-paste("Cond: ", dataF$Fish_Conditions[i], sep="")
+  }else{
+    Fish_Conditions<-""
+  }
+  
+  # if(!is.na(dataF$Water_flows_cm_s[i])){
+  #   Water_flows_cm_s<-paste("Flow: ", dataF$Water_flows_cm_s[i], sep="")
+  # }else{
+  #   Water_flows_cm_s<-""
+  # }
+  
+  # if(!is.na(dataF$Swim_Conditions2[i])){
+  #   Swim_Conditions2<-paste("Migrat: ", dataF$Swim_Conditions2[i], sep="")
+  # }else{
+  #   Swim_Conditions2<-""
+  # }
+  
+  # cond<-paste(Mortality,Recovery, Fish_Conditions, Water_flows_cm_s, Swim_Conditions2, sep=" ")
+  cond<-paste(Mortality,Recovery, Fish_Conditions, sep=" ")
+  dataF$cond[i]<-cond
+}
+# dataF$cond<-paste(dataF$Mortality,dataF$Recovery, dataF$Fish_Conditions, dataF$Water_flows_cm_s, dataF$Swim_Conditions2, sep="-")
 
+datF.sum<-dataF %>% 
+  group_by(cond, Species_latin) %>% 
+  summarize(mean_swim = mean(SWIM_cms, na.rm =TRUE))
+  
+ggplot(datF.sum, aes(y = mean_swim, x = Species_latin , color = Species_latin, group = cond))+
+  geom_point( size=3 )+
+  geom_text( aes(y = mean_swim, x = Species_latin, label=cond))+
+  facet_wrap(.~Species_latin, nrow=2, scales = "free_x")
 
 
 
