@@ -68,7 +68,7 @@ data$Fish_Conditions<-as.factor(as.character(data$Fish_Conditions))
 # make all ucrits (repeat test as well as EMG Ucrits under one - Ucrit)
 
 # one fast start study by Harper et al [ref 67]: the acceleration data are not included. 
-data<-data[-which(data$swim_speed_MEAN_cm_s > 2000),] # lines 1114, 1115
+data<-data[!c(which(data$swim_speed_MEAN_cm_s > 2000)),] # lines 1114, 1115
 
 # grouping Test performance in broader categories
 data$Test_performance2<-NA

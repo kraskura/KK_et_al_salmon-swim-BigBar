@@ -147,7 +147,7 @@ dev.off()
 
 
 # summary ridgeplots, freq plots ------------
-# reorder teh species:
+# reorder the species:
   data <- data %>%
   mutate(Species_latin = fct_relevel(Species_latin, levels ="Salmo salar", "Oncorhynchus mykiss","Oncorhynchus gorbuscha","Oncorhynchus kisutch", "Oncorhynchus keta","Oncorhynchus nerka","Oncorhynchus tshawytscha"))
 
@@ -172,8 +172,6 @@ ggplot(data[!(data$Species_latin=="Oncorhynchus masou"),], aes(x = Temp_test_mea
   xlab("Temperature (ºC)")+
   theme(axis.title.y = element_blank(),
         axis.text.y = element_text(face = "italic"))
-
-
 
 
 # figure 2 -- all plots together --------
