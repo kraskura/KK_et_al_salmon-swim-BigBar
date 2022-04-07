@@ -890,9 +890,23 @@ cowplot::plot_grid( fish_condcm,fish_condBL,
 
 # SWIM TESTS --------------
 
-# level_order <- c("fallback", "pass", "mature" , "exercise trained","diet" , "infection", "unhealthy",  "prior anesthetic","spawned",  "density", "density exercise trained","toxicant ") #this vector might be useful for other plots/analyses
+# sample sizes on the plot
+dd.label.BL<-data[!is.na(data$Test_performance2) & !is.na(data$swim_speed_MEAN_BL_s),] %>% 
+  group_by(Test_performance2) %>% 
+  summarize(n_stud = length(unique(Reference_number_1)), n = n())
+dd.label.BL$label<-paste( dd.label.BL$n, " (", dd.label.BL$n_stud,")", sep="")
 
-test_condBL<-ggplot(data = data[!is.na(data$Test_performance2),], aes(y=swim_speed_MEAN_BL_s, fill=Species_latin, x=factor(Test_performance2), group = Test_performance2))+
+dd.label.cm<-data[!is.na(data$Test_performance2) & !is.na(data$SWIM_cms),] %>% 
+  group_by(Test_performance2) %>% 
+  summarize(n_stud = length(unique(Reference_number_1)), n = n())
+dd.label.cm$label<-paste( dd.label.cm$n, " (", dd.label.cm$n_stud,")", sep="")
+
+
+
+level_orderTest <- c("Field", "Jump", "Ucrit" , "Umax","Swim")
+
+test_condBL<-ggplot(data = data[!is.na(data$Test_performance2),],
+                    aes(y=swim_speed_MEAN_BL_s, fill=Species_latin, x=factor(Test_performance2, levels = level_orderTest), group = Test_performance2))+
   geom_boxplot(fill = "white", alpha=1, outlier.shape=NA) +
   geom_point(position=position_jitter(width = 0.2, seed=1002), alpha=1, pch=21, size=2)+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
@@ -901,30 +915,34 @@ test_condBL<-ggplot(data = data[!is.na(data$Test_performance2),], aes(y=swim_spe
   scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-  # scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
+  scale_y_continuous(limits = c(-0.41, 15), breaks = c(0, 3, 6, 9, 12, 15) )+
+  geom_text(mapping = aes( x = factor(Test_performance2, levels = level_orderTest),fill=NULL, y = -0.3, label = label), color = "black", size=3, data = dd.label.BL)
+# scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
   #                  labels=c("Oncorhynchus spp.", "O. mykiss", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha","O. masou","Salmo salar"))
-  coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgerblue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
+  # coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgerblue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
 ggformat(test_condBL, title = "", y_title = "Swim speed (BL/s)", x_title = "", print = F, size_text = 13)
 test_condBL <-test_condBL + theme( #legend.position = "none")
                                       legend.title = element_blank(),
                                       # legend.box = element_rect(fill = "white", colour = "grey30", size=0.5),
-                                      legend.position = c(0.71,0.62),
-                                      legend.text = element_text(face = "italic", size = 10.5))
+                                      legend.position = c(0.71,0.71),
+                                      legend.text = element_text(face = "italic", size = 9))
 test_condBL
 
 
 # level_order <- c("fallback", "pass", "mature" , "exercise trained","diet" , "infection", "unhealthy",  "prior anesthetic","spawned",  "density", "density exercise trained","toxicant ") #this vector might be useful for other plots/analyses
 
-test_condcm<-ggplot(data = data[!is.na(data$Test_performance2),], aes(y=SWIM_cms, fill=fillFC, color = fillFC, x=factor(Test_performance2), group = Test_performance2))+
+test_condcm<-ggplot(data = data[!is.na(data$Test_performance2),], aes(y=SWIM_cms, fill=fillFC, color = fillFC, x=factor(Test_performance2,  levels = level_orderTest), group = Test_performance2))+
   geom_boxplot(fill = "white", alpha=1, outlier.shape=NA, color = "black") +
   geom_point(position=position_jitter(width = 0.2, seed=1002), alpha=1, pch=21, size=2, show.legend = F)+
   scale_fill_manual(breaks = levels.FC,
                     values = fill.FC)+
   scale_color_manual(breaks = levels.FC,
                      values = cols.FC)+
+  geom_text(mapping = aes( x = factor(Test_performance2, levels = level_orderTest),fill=NULL, y = -18, label = label), color = "black", size=3, data = dd.label.cm)
+  scale_y_continuous(limits = c(-20, 850), breaks = c(0,100, 200, 300, 400, 500, 600,700, 800) )
   # scale_x_discrete(breaks = c("Oncorhynchus spp.", "Oncorhynchus mykiss", "Oncorhynchus gorbuscha", "Oncorhynchus keta", "Oncorhynchus kisutch", "Oncorhynchus nerka", "Oncorhynchus tshawytscha", "Oncorhynchus masou", "Salmo salar"),
   #                  labels=c("Oncorhynchus spp.", "O. mykiss", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha","O. masou","Salmo salar"))
-  coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgercmue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
+  # coord_flip()# scale_fill_manual(values = c("white", "#386CB0", "dodgercmue", "#386CB0", "red",  "#D9D9D9","#FFFFB3","#7FC97F",   "#A65628", "#FB8072", "grey", "darkgrey"))+
 ggformat(test_condcm, title = "", y_title = "Swim speed (cm/s)", x_title = "", print = F, size_text = 13)
 test_condcm<-test_condcm + theme( legend.title = element_blank(),
                                   # legend.box = element_rect(fill = "white", colour = "grey30", size=0.5),
@@ -933,12 +951,12 @@ test_condcm<-test_condcm + theme( legend.title = element_blank(),
 test_condcm
 
 cowplot::plot_grid( test_condcm,test_condBL,
-                    nrow = 2, ncol=1,
+                    nrow = 1, ncol=2,
                     labels = "AUTO",
-                    label_x = c(0.9),
-                    label_y = c(0.89, 0.89)) %>%
+                    label_x = c(0.9, 0.9),
+                    label_y = c(0.92)) %>%
   ggsave(filename = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Fig8_cms_SwimTest.png",
-         width = 5.5, height = 7.5,units = "in")
+         width = 8.5, height = 5,units = "in")
 
 
 

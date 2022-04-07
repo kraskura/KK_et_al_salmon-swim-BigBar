@@ -221,7 +221,7 @@ data.cmTNorm.use<-data.cmTNorm[data.cmTNorm$useTNorm==1,]
 
 # SIZE: stats, modelling ------------
 # the regression datasets:
-data.cm.ucrit<-data.cm[data.cm$Test_performance2=="Ucrit",]
+data.cm.ucrit<-data.cm[data.cm$Test_performance2=="Ucrit" | data.cm$Test_performance2=="Umax",]
 data.cm.field<-data.cm[data.cm$Test_performance2=="Field",]
 data.cm.field.l<-data.cm[data.cm$Test_performance2=="Field" & data.cm$SWIM_cms < 250,]
 data.cm.field.h<-data.cm[data.cm$Test_performance2=="Field" & data.cm$SWIM_cms >= 250,]
@@ -407,7 +407,7 @@ CI.ucritsalar<-confint(mod.size.ucrit.salar)
 data.pred.CI.ucrit.salar<-as.data.frame(predict(mod.size.ucrit.salar, interval = "confidence")) 
 
 
-# 1. coho : "Oncorhynchus kisutch"
+# 7. coho : "Oncorhynchus kisutch"
 mod.size.ucrit.coho<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.ucrit[(data.cm.ucrit$Species_latin == "Oncorhynchus kisutch"),])
 n<-nrow(data.cm.ucrit[(data.cm.ucrit$Species_latin == "Oncorhynchus kisutch"),])
 CI.ucritcoho<-confint(mod.size.ucrit.coho)
@@ -432,13 +432,24 @@ data.cm.ucrit.sp %>%
 # TEMPERATURE: stats, modelling ------------
 
 data.cmTNorm.use<-data.cmTNorm.use[!is.na(data.cmTNorm.use$Temp_test_mean),]
+data.cmT.use<-data.cm[c(!is.na(data.cm$Temp_test_mean) & c(data.cm$Test_performance2 == "Ucrit" | data.cm$Test_performance2 == "Umax")),] # for all swim data together
+data.cmT.use<- data.cmT.use[!data.cmT.use$Species_latin == "Oncorhynchus masou",]# masu salmon one datapoint to use, no curves. 
+
 # *********** START ***************************************
 # mixed models, species random eintercept
 # ******************************************************
 data.cmTNorm.use.ucrit<-data.cmTNorm.use[data.cmTNorm.use$Test_performance2 == "Ucrit",]
 mod.size.ucrit<-lmer(SWIM_cms.prop0~ poly(Temp_test_mean,2) + (1|Species_latin), data.cmTNorm.use.ucrit)
 
+# all test data as recorded:
+mod.size.ucritI<-lmer(SWIM_cms~ poly(Temp_test_mean,2) + (1|Species_latin), data.cmT.use)
+
+
 temp.sum<-data.cmTNorm.use.ucrit %>%
+  dplyr::group_by(Species_latin) %>%
+  summarise(n=n(), mintemp = min(Temp_test_mean), maxtemp = max(Temp_test_mean), n_studies = length(unique(Reference_number_1)))
+
+temp.sumI<-data.cmT.use %>%
   dplyr::group_by(Species_latin) %>%
   summarise(n=n(), mintemp = min(Temp_test_mean), maxtemp = max(Temp_test_mean), n_studies = length(unique(Reference_number_1)))
 # ******************************************************
@@ -449,6 +460,7 @@ temp.sum<-data.cmTNorm.use.ucrit %>%
 # *********** START ***************************************
 # Field all swim speeds
 # ******************************************************
+data.cmTNorm.use.ucrit.sp$Species_latin<-factor(data.cmTNorm.use.ucrit.sp$Species_latin)
 data.cmTNorm.use.ucrit.sp$Species_latin<-factor(data.cmTNorm.use.ucrit.sp$Species_latin)
 
 # species specific fits, CI of models, resid plots
@@ -498,16 +510,83 @@ CI.temp.salar<-confint(mod.salar)
 data.pred.CI.temp.salar<-as.data.frame(predict(mod.salar, interval = "confidence")) 
 
 
+
+
+
+### ****** ALL DATA AS RECORDED, not normalized:
+# species specific fits, CI of models, resid plots
+# 1. pink : "Oncorhynchus gorbuscha"
+modI.pink<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus gorbuscha"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus gorbuscha"),])
+CI.tempI.pink<-confint(modI.pink)
+par(mfrow = c(2, 2), oma = c(0, 0, 2, 0))
+# plot(modI.pink)
+data.pred.CI.tempI.pink<-as.data.frame(predict(modI.pink, interval = "confidence")) 
+
+
+# 2. sockeye: Oncorhynchus nerka
+modI.soc<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus nerka"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus nerka"),])
+CI.tempI.soc<-confint(modI.soc)
+plot(modI.soc)
+data.pred.CI.tempI.soc<-as.data.frame(predict(modI.soc, interval = "confidence")) 
+
+
+# 3. trouts: Oncorhynchus mykiss
+modI.trouts<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus mykiss"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus mykiss"),])
+CI.tempI.trouts<-confint(modI.trouts)
+# plot(modI.trouts)
+data.pred.CI.tempI.trouts<-as.data.frame(predict(modI.trouts, interval = "confidence")) 
+
+# 4. chinook: Oncorhynchus tshawytscha
+modI.chin<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus tshawytscha"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus tshawytscha"),])
+CI.tempI.chin<-confint(modI.chin)
+# plot(modI.chin) 
+data.pred.CI.tempI.chin<-as.data.frame(predict(modI.chin, interval = "confidence")) 
+
+# 5. coho: Oncorhynchus kisutch
+modI.coho<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus kisutch"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus kisutch"),])
+CI.tempI.coho<-confint(modI.coho)
+# plot(modI.coho) 
+data.pred.CI.tempI.coho<-as.data.frame(predict(modI.coho, interval = "confidence")) 
+
+# 6. Atlantic: Salmo salar
+modI.salar<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Salmo salar"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Salmo salar"),])
+CI.tempI.salar<-confint(modI.salar)
+# plot(modI.salar) 
+data.pred.CI.tempI.salar<-as.data.frame(predict(modI.salar, interval = "confidence")) 
+
+# 7 Chum 
+modI.chum<-lm(SWIM_cms~ poly(Temp_test_mean,2), na.action=na.exclude, data = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus keta"),])
+n<-nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus keta"),])
+CI.tempI.chum<-confint(modI.chum)
+# plot(modI.salar) 
+data.pred.CI.tempI.chum<-as.data.frame(predict(modI.chum, interval = "confidence")) 
+### ****** ALL DATA AS RECORDED, not normalized:
+
+
+
+
+
 # summary of all fits
 data.cmTNorm.use.ucrit %>%
   dplyr::group_by(Species_latin) %>%
-  do(broom::tidy(lm(SWIM_cms.prop0~ poly(Temp_test_mean,2), ., na.action=na.omit))) %>% 
+  do(broom::tidy(lm(SWIM_cms.prop0~ poly(Temp_test_mean,2), ., na.action=na.exclude))) %>% 
+  ungroup()
+
+data.cmT.use %>%
+  dplyr::group_by(Species_latin) %>%
+  do(broom::tidy(lm(SWIM_cms~ poly(Temp_test_mean,2), ., na.action=na.exclude))) %>% 
   ungroup()
 # ******************************************************
 # *********** END *************************************
 
 
-species.temp.plots<-function(model, dd, species){
+species.temp.plots<-function(model, dd, species, temp.sum = temp.sum, dataset = "normalized"){
   
     data.pred.CI<-predict(model, interval = "confidence") 
     dd$pred.mod<-data.pred.CI[,1]
@@ -517,31 +596,65 @@ species.temp.plots<-function(model, dd, species){
     n<-temp.sum[temp.sum$Species_latin == species,"n"]
     label.plot<-paste("n = ", n, " (", n.stud,")", sep="")
     
-    plot.sp.t<-ggplot(data=dd, aes(y=SWIM_cms.prop0, x=Temp_test_mean, fill=Species_latin, colour=Species_latin, shape=SWIM_cms_source,group = Species_latin))+
-      scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
-                         labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
-                         values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-      scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
-                        labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
-                        values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-      geom_point(size = 2, alpha=1)+
-      # facet_wrap(.~Species_latin)+
-      geom_text(mapping = aes( x = 12, y = 5), label = label.plot, color = "black", size=4.5)+
-      scale_shape_manual(values = c(21,23))+
-      geom_ribbon(aes(ymin = pred.modCI.l,
-                      ymax = pred.modCI.h), alpha = 0.3)+
-      geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
-      ylim(0, 110)+
-      scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
-    ggformat(plot.sp.t, print=F, y_title = "Normalized Swim speed (%, cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 12)
-    plot.sp.t<-plot.sp.t+theme(legend.position = "none")
-    # p2.cmNorm0
+    if(dataset == "normalized"){
+      plot.sp.t<-ggplot(data=dd, aes(y=SWIM_cms.prop0, x=Temp_test_mean, fill=Species_latin, colour=Species_latin, shape=SWIM_cms_source,group = Species_latin))+
+        scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                           labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+                           values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+        scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                          labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+                          values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+        geom_point(size = 2, alpha=1)+
+        # facet_wrap(.~Species_latin)+
+        geom_text(mapping = aes( x = 12, y = 5), label = label.plot, color = "black", size=4.5)+
+        scale_shape_manual(values = c(21,23))+
+        geom_ribbon(aes(ymin = pred.modCI.l,
+                        ymax = pred.modCI.h), alpha = 0.3)+
+        geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
+        ylim(0, 120)+
+        scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
+      ggformat(plot.sp.t, print=F, y_title = "Normalized Swim speed (%, cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 12)
+      plot.sp.t<-plot.sp.t+theme(legend.position = "none")
+      # p2.cmNorm0
+      
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd",sep=""),dd, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd",sep=""))
+      
+      ggsave(filename = paste("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Temp_normalized/Sp_", species,".png", sep=""),
+             plot = plot.sp.t, width = 3, height = 3)
+      
+    }
+   
+    if(dataset == "full"){
+      plot.sp.t<-ggplot(data=dd, aes(y=SWIM_cms, x=Temp_test_mean, fill=Species_latin, colour=Species_latin, shape=SWIM_cms_source,group = Species_latin))+
+        scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                           labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+                           values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+        scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                          labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+                          values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+        geom_point(size = 2, alpha=1)+
+        # facet_wrap(.~Species_latin)+
+        geom_text(mapping = aes( x = 12, y = 15), label = label.plot, color = "black", size=4.5)+
+        scale_shape_manual(values = c(21,23))+
+        geom_ribbon(aes(ymin = pred.modCI.l,
+                        ymax = pred.modCI.h), alpha = 0.3)+
+        geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
+        ylim(0, 250)+
+        scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
+      ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 12)
+      plot.sp.t<-plot.sp.t+theme(legend.position = "none")
+      # p2.cmNorm0
+      
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_full",sep=""),dd, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_full",sep=""))
+      
+      ggsave(filename = paste("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Temp_normalized/Sp_FULL_", species,".png", sep=""),
+             plot = plot.sp.t, width = 3, height = 3)
+    }
     
-    assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd",sep=""),dd, envir = .GlobalEnv)
-    message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd",sep=""))
     
-    ggsave(filename = paste("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Temp_normalized/Sp_", species,".png", sep=""),
-           plot = plot.sp.t, width = 4, height = 4)
+   
 }
 
 species.size.plots<-function(model, dd, species, sum.file, test="field"){
@@ -570,13 +683,13 @@ species.size.plots<-function(model, dd, species, sum.file, test="field"){
     geom_line(aes(y=pred.mod, x=LENGTH_cm), color = "black")+
     scale_x_continuous(limits = c(30, 100), breaks = c(30, 40, 50, 60, 70, 80, 90))
     if(test=="field"){
-      plot.sp.s<- plot.sp.s+ geom_text(mapping = aes( x = 41, y = 900), label = label.plot, color = "black", size=4.5)+
-        geom_text(mapping = aes( x = 41, y = 965), label = "Field", color = "black", size=4.5)+
+      plot.sp.s<- plot.sp.s+ geom_text(mapping = aes( x = 45, y = 865), label = label.plot, color = "black", size=4.5)+
+        geom_text(mapping = aes( x = 45, y = 965), label = "Field", color = "black", size=4.5)+
         ylim(0, 1000)
     }
     if(test=="ucrit"){
-      plot.sp.s<- plot.sp.s+geom_text(mapping = aes( x = 41, y = 239), label = label.plot, color = "black", size=4.5)+
-        geom_text(mapping = aes( x = 41, y = 256), label = "Ucrit", color = "black", size=4.5)+
+      plot.sp.s<- plot.sp.s+geom_text(mapping = aes( x = 45, y = 225), label = label.plot, color = "black", size=4.5)+
+        geom_text(mapping = aes( x = 45, y = 256), label = "Ucrit", color = "black", size=4.5)+
         ylim(0, 270)
     }
     ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 12)
@@ -593,7 +706,7 @@ species.size.plots<-function(model, dd, species, sum.file, test="field"){
   }
   
   ggsave(filename = paste("/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/Size_byTest/Sp_", species,"-", test,".png", sep=""),
-         plot = plot.sp.s, width = 4, height = 4)
+         plot = plot.sp.s, width = 3, height = 3)
 }
 
 species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus gorbuscha"),],
@@ -656,22 +769,54 @@ species.size.plots(dd=data.cm.ucrit[(data.cm.ucrit$Species_latin == "Oncorhynchu
 
 species.temp.plots(dd = data.cmTNorm.use.ucrit[(data.cmTNorm.use.ucrit$Species_latin == "Oncorhynchus gorbuscha"),],
                    model = mod.pink,
-                   species = "Oncorhynchus gorbuscha")
+                   species = "Oncorhynchus gorbuscha",temp.sum = temp.sum, dataset = "normalized")
 species.temp.plots(dd = data.cmTNorm.use.ucrit[(data.cmTNorm.use.ucrit$Species_latin == "Oncorhynchus nerka"),],
                    model = mod.soc,
-                   species = "Oncorhynchus nerka")
+                   species = "Oncorhynchus nerka",temp.sum = temp.sum, dataset = "normalized")
 species.temp.plots(dd = data.cmTNorm.use.ucrit[(data.cmTNorm.use.ucrit$Species_latin == "Oncorhynchus kisutch"),],
                    model = mod.coho,
-                   species = "Oncorhynchus kisutch")
+                   species = "Oncorhynchus kisutch",temp.sum = temp.sum, dataset = "normalized")
 species.temp.plots(dd = data.cmTNorm.use.ucrit[(data.cmTNorm.use.ucrit$Species_latin == "Salmo salar"),],
                    model = mod.salar,
-                   species = "Salmo salar")
+                   species = "Salmo salar",temp.sum = temp.sum, dataset = "normalized")
 species.temp.plots(dd = data.cmTNorm.use.ucrit[(data.cmTNorm.use.ucrit$Species_latin == "Oncorhynchus mykiss"),],
                    model = mod.trouts,
-                   species = "Oncorhynchus mykiss")
+                   species = "Oncorhynchus mykiss",temp.sum = temp.sum, dataset = "normalized")
 species.temp.plots(dd = data.cmTNorm.use.ucrit[(data.cmTNorm.use.ucrit$Species_latin == "Oncorhynchus tshawytscha"),],
                    model = mod.chin,
-                   species = "Oncorhynchus tshawytscha")
+                   species = "Oncorhynchus tshawytscha",temp.sum = temp.sum, dataset = "normalized")
+
+
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus gorbuscha"),],
+                   model = modI.pink,
+                   species = "Oncorhynchus gorbuscha", 
+                   temp.sum = temp.sumI, 
+                   dataset = "full")
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus nerka"),],
+                   model = modI.soc,
+                   species = "Oncorhynchus nerka", temp.sum = temp.sumI, 
+                   dataset = "full")
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus kisutch"),],
+                   model = modI.coho,
+                   species = "Oncorhynchus kisutch", temp.sum = temp.sumI, 
+                   dataset = "full")
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Salmo salar"),],
+                   model = modI.salar,
+                   species = "Salmo salar",temp.sum = temp.sumI, 
+                   dataset = "full")
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus mykiss"),],
+                   model = modI.trouts,
+                   species = "Oncorhynchus mykiss", temp.sum = temp.sumI, 
+                   dataset = "full")
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus tshawytscha"),],
+                   model = modI.chin,
+                   species = "Oncorhynchus tshawytscha", temp.sum = temp.sumI, 
+                   dataset = "full")
+species.temp.plots(dd = data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus keta"),],
+                   model = modI.chum,
+                   species = "Oncorhynchus keta", temp.sum = temp.sumI, 
+                   dataset = "full")
+
 
 
 
@@ -682,6 +827,11 @@ dd_Temp<-rbind(Oncorhynchusgorbuscha_Tdd,
       Oncorhynchuskisutch_Tdd,
       Oncorhynchusmykiss_Tdd, Oncorhynchusnerka_Tdd,
       Oncorhynchustshawytscha_Tdd, Salmosalar_Tdd)
+
+dd_TempI<-rbind(Oncorhynchusgorbuscha_Tdd_full,
+               Oncorhynchuskisutch_Tdd_full,
+               Oncorhynchusmykiss_Tdd_full, Oncorhynchusnerka_Tdd_full,
+               Oncorhynchustshawytscha_Tdd_full, Salmosalar_Tdd_full)
 
 dd_sizeUcrit<-rbind(Oncorhynchusgorbuscha_Udd, Oncorhynchuskisutch_Udd,
       Oncorhynchuskisutch_Udd,
@@ -694,27 +844,27 @@ dd_sizeField<-rbind(
       Oncorhynchusmykiss_Fdd, Oncorhynchusnerka_Fdd,
       Oncorhynchustshawytscha_Fdd)
 
-preds <- predictInterval(mod.size.ucrit, newdata = data.cm.ucrit, n.sims = 999)
+# preds <- predictInterval(mod.size.ucrit, newdata = data.cm.ucrit, n.sims = 999)
 data.cm.ucrit$fit.mod.ALL2 <- predict(mod.size.ucrit)
 data.cm.ucrit$fit.mod.ALL<-preds[,1]
 data.cm.ucrit$fit.mod.ALL.CI.l<-preds[,3]
 data.cm.ucrit$fit.mod.ALL.CI.h<-preds[,2]
 # warnings()
 
-predsF <- predictInterval(mod.size.field, newdata = data.cm.field, n.sims = 999 )
+# predsF <- predictInterval(mod.size.field, newdata = data.cm.field, n.sims = 999 )
 data.cm.field$fit.mod.ALL2 <- predict(mod.size.field)
 # data.cm.field$fit.mod.ALL<-predsF[,1] # ran ef
 # data.cm.field$fit.mod.ALL.CI.l<-predsF[,3]
 # data.cm.field$fit.mod.ALL.CI.h<-predsF[,2]
 # warnings()
 
-predsFl <- predictInterval(mod.size.field.l, newdata = data.cm.field.l, n.sims = 999)
+# predsFl <- predictInterval(mod.size.field.l, newdata = data.cm.field.l, n.sims = 999)
 data.cm.field.l$fit.mod.ALL2 <- predict(mod.size.field.l)
 # data.cm.field.l$fit.mod.ALL<-predsFl[,1]
 # data.cm.field.l$fit.mod.ALL.CI.l<-predsFl[,3]
 # data.cm.field.l$fit.mod.ALL.CI.h<-predsFl[,2]
 
-predsFh <- predictInterval(mod.size.field.h, newdata = data.cm.field.h, n.sims = 999)
+# predsFh <- predictInterval(mod.size.field.h, newdata = data.cm.field.h, n.sims = 999)
 data.cm.field.h$fit.mod.ALL2 <- predict(mod.size.field.h)
 # data.cm.field.h$fit.mod.ALL<-predsFh[,1]
 # data.cm.field.h$fit.mod.ALL.CI.l<-predsFh[,3]
@@ -738,13 +888,15 @@ p1.cm<-ggplot(data=data.cm.ucrit, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_lati
   geom_errorbarh(aes(xmin=LENGTH_cm-Length_error,
                      xmax=LENGTH_cm+Length_error), size =0.2, alpha=0.4)+
   geom_point(size=2, alpha=0.4)+
+  geom_hline(yintercept = 250, color = "grey", size=0.3, lty=2)+
   scale_shape_manual(values = c(21,23))+
-  geom_text(mapping = aes( x =32, y = 215), label = "Ucrit", color = "black", size=4.5)+
+  geom_text(mapping = aes( x =31, y = 230), label = "Ucrit & Umax", color = "black", size=4.5)+
   # geom_ribbon(aes(ymin = fit.mod.ALL.CI.l,
   #                 ymax = fit.mod.ALL.CI.h), alpha = 0.3)+
   geom_line(aes(y=fit.mod.ALL2, x=LENGTH_cm), size=2)+
   geom_line(aes(y=fit.mod.ALL2, x=LENGTH_cm), color = "black", size=0.6)+
-  xlim(25, 100)
+  xlim(15, 100)+
+  ylim(0, 260)
 ggformat(p1.cm, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="")
 p1.cm<-p1.cm+theme(legend.position = "none")
 p1.cm
@@ -811,7 +963,7 @@ p1.cmF
 
 # TEMPERATURE: figures ----------------------
 
-p2.PREDFIT <- ggplot(data= dd_Temp[!dd_Temp$Species_latin == "Oncorhynchus tshawytscha",], aes(y=pred.mod, x=Temp_test_mean, fill=Species_latin,
+p2.PREDFIT <- ggplot(data= dd_Temp, aes(y=pred.mod, x=Temp_test_mean, fill=Species_latin,
                                                                                               colour=Species_latin,
                                                                                               shape=SWIM_cms_source,
                                                                                               label=Reference_number_1,
@@ -826,19 +978,43 @@ p2.PREDFIT <- ggplot(data= dd_Temp[!dd_Temp$Species_latin == "Oncorhynchus tshaw
   #                 ymax = pred.modCI.h), alpha = 0.3)+
   geom_line(aes(y=pred.mod, x=Temp_test_mean), size=2)+ 
   geom_text(mapping = aes( x =21, y = 8), label = "Ucrit only", color = "black", size=4.5)+
-  geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black", size=0.6)+  
+  geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black", size=0.3)+  
   scale_shape_manual(values = c(21,23))+
-  ylim(0, 110)
+  ylim(0, 125)
 ggformat(p2.PREDFIT, print=F, y_title = "Normalized Swim speed (%, cm/s)", x_title = "Temperature (ºC)", title ="")
 p2.PREDFIT<-p2.PREDFIT+theme(legend.position = "none")
 p2.PREDFIT
 
+p2.PREDFIT_full <- ggplot(data= dd_TempI, aes(y=pred.mod, x=Temp_test_mean, fill=Species_latin,
+                                        colour=Species_latin,
+                                        shape=SWIM_cms_source,
+                                        label=Reference_number_1,
+                                        group = Species_latin))+
+  scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  # geom_ribbon(aes(ymin = pred.modCI.l,
+  #                 ymax = pred.modCI.h), alpha = 0.3)+
+  geom_line(aes(y=pred.mod, x=Temp_test_mean), size=2)+ 
+  geom_text(mapping = aes( x =21, y = 8), label = "Ucrit & Umax", color = "black", size=4.5)+
+  # geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black", size=0.3)+  
+  scale_shape_manual(values = c(21,23))+
+  ylim(0, 250)
+ggformat(p2.PREDFIT_full, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="")
+p2.PREDFIT_full<-p2.PREDFIT_full+theme(legend.position = "none")
+p2.PREDFIT_full
 
 
 
 
 ggsave(filename = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/FigTEMP_NORM.png",
        plot = p2.PREDFIT, width = 4, height = 4,units = "in")
+ggsave(filename = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Figures/FigTEMP_FULL.png",
+       plot = p2.PREDFIT_full, width = 4, height = 4,units = "in")
+
 
 cowplot::plot_grid(p1.cm, p1.cmF,
                    nrow = 1, ncol =2, align = "hv",
