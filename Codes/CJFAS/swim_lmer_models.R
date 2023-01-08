@@ -8,24 +8,24 @@ vapply(pkgs, library, logical(1), character.only = TRUE, logical.return = TRUE,
 
 # *************************
 
-# source: ---------
+# 0. source data and code: ---------
+source("/Users/kristakraskura/Github_repositories//KK_et_al_salmon-swim-BigBar/Codes/PSC/table_BIC.R")
+source("/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Codes/get_dataset.R")
 source("/Users/kristakraskura/Github_repositories/Plots-formatting/ggplot_format.R")
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/get_dataset.R")
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/table_BIC.R")
 # *************************
 
 
-# get data, housekeeping: -------------
+# 1. import and wrangle the data -------------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Data/Kraskura_salmonSwim_analysis_jan2022.csv")
+  data.file = "/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Data/Files/Kraskura_salmonSwim_analysis_jan2022.csv")
 
 # available datasets:
 # return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
 
 # all but time to fatigue tests for general analysis:
 data<-as.data.frame(data.all[1])
-data<-data[!c(data$Test_performance2=="TTF"),]
 data.ttf<-data[c(data$Test_performance2=="TTF"),]
+data<-data[!c(data$Test_performance2=="TTF"),]
 
 data$Species_latin<-as.factor(data$Species_latin)
 data$Sex_F_M<-as.factor(data$Sex_F_M)
@@ -47,7 +47,7 @@ data.model<-data[!c(data$Species_latin == "Oncorhynchus spp."),
                     "Species_latin","Sex_F_M", "Temp_test_mean",
                     "LENGTH_cm", "SWIM_cms", "SWIM_cms_SD", "SW_FW", "Test_performance2")]
 
-nrow(data.model)
+nrow(data.model) # 1655 (jan 3 2023)
 names(data.model)
 cols = c(1,7:10)
 cols_fact = c(2, 3, 4, 5, 6, 11, 12)
@@ -55,9 +55,11 @@ data.model[,cols]<-lapply(data.model[,cols], as.numeric)
 data.model[,cols_fact]<-lapply(data.model[cols_fact], factor)
 str(data.model)
 
-# weights in gam ----------
+# 3. Models  ------
+## 3.1 weights in mixed models ----------
 # weights prior weights on the contribution of the data to the log likelihood. Note that a
-# weight of 2, for example, is equivalent to having made exactly the same observation twice. If you want to reweight the contributions of each datum without
+# weight of 2, for example, is equivalent to having made exactly the same observation twice. 
+# If we want to reweigh the contributions of each datum without
 # changing the overall magnitude of the log likelihood, then you should normalize
 # the weights (e.g. weights <-weights/mean(weights)).
 
@@ -104,59 +106,63 @@ data.model.cm<-data.model[complete.cases(data.model[, c("SWIM_cms", "vi",
 # FishID not accounted in the gam model, too computationally heavy, but reference and the origin are. 
 # use ML
 
+## 3.2. weighed mixed models: weights = inverse variation  (lmer) ------
 
-m1_lmer0 <- lmer(SWIM_cms ~  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1 <- lmer(SWIM_cms ~ Temp_test_mean + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer2 <- lmer(SWIM_cms ~ LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer3 <- lmer(SWIM_cms ~ Species_latin -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer0 <- lmer(SWIM_cms ~  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1 <- lmer(SWIM_cms ~ Temp_test_mean + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer2 <- lmer(SWIM_cms ~ LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer3 <- lmer(SWIM_cms ~ Species_latin -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
 
-m1_lmer1.2 <- lmer(SWIM_cms ~ Temp_test_mean + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.3 <- lmer(SWIM_cms ~ Temp_test_mean + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.4 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.5 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.2 <- lmer(SWIM_cms ~ Temp_test_mean + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.3 <- lmer(SWIM_cms ~ Temp_test_mean + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.4 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.5 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
 
-m1_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin  -1 + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin  -1 + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
 
-# weight = n
-m1_lmer0 <- lmer(SWIM_cms ~  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer1 <- lmer(SWIM_cms ~ Temp_test_mean + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer2 <- lmer(SWIM_cms ~ LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer3 <- lmer(SWIM_cms ~ Species_latin -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+## 3.3. weighed mixed models: weights = n swim (lmer) ------
+m1w2_lmer0 <- lmer(SWIM_cms ~  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer1 <- lmer(SWIM_cms ~ Temp_test_mean + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer2 <- lmer(SWIM_cms ~ LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer3 <- lmer(SWIM_cms ~ Species_latin -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
 
-m1_lmer1.2 <- lmer(SWIM_cms ~ Temp_test_mean + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer1.3 <- lmer(SWIM_cms ~ Temp_test_mean + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer1.4 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer1.5 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
-m1_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer1.2 <- lmer(SWIM_cms ~ Temp_test_mean + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer1.3 <- lmer(SWIM_cms ~ Temp_test_mean + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer1.4 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer1.5 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
 
-m1_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin  -1 + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+m1w2_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin  -1 + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm2, REML = FALSE, weights = N_swim_speed)
+
+## 3.4. mixed models: no weights  (lmer) ------
+
+m1_lmer0 <- lmer(SWIM_cms ~  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer1 <- lmer(SWIM_cms ~ Temp_test_mean + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer2 <- lmer(SWIM_cms ~ LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer3 <- lmer(SWIM_cms ~ Species_latin -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+
+m1_lmer1.2 <- lmer(SWIM_cms ~ Temp_test_mean + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer1.3 <- lmer(SWIM_cms ~ Temp_test_mean + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer1.4 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer1.5 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+m1_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
+
+m1_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin  -1 + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
 
 
-# no weight:
-# m1_lmer0 <- lmer(SWIM_cms ~  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer1 <- lmer(SWIM_cms ~ Temp_test_mean + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer2 <- lmer(SWIM_cms ~ LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer3 <- lmer(SWIM_cms ~ Species_latin -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer1.2 <- lmer(SWIM_cms ~ Temp_test_mean + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer1.3 <- lmer(SWIM_cms ~ Temp_test_mean + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer1.4 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer1.5 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Sex_F_M  -1 + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin -1 +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# m1_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin  -1 + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE)
-# 
 
+## 3.2. mixed models: poly 3rd order, weights = inverse variation  (lmer) ------
+ 
+m1w1_lmer1p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
 
-# poly fits
-m1_lmer1p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.2p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.3p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + Species_latin +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.4p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.5p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmer1.6p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + Species_latin +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
 
-m1_lmer1.2p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.3p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + Species_latin +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.4p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.5p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-m1_lmer1.6p <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + Species_latin +  (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
-
-m1_lmerFULLp <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + Species_latin + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
+m1w1_lmerFULLp <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + Species_latin + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model.cm, REML = FALSE, weights = 1/vi)
 
 
 
@@ -168,29 +174,37 @@ m1_lmerFULLp <- lmer(SWIM_cms ~ poly(Temp_test_mean, degree = 3) + LENGTH_cm + S
 
 
 # model summaries comparison, selection -------------
-lmerTable <- BIC(m1_lmer0, m1_lmer1, m1_lmer2, m1_lmer3, m1_lmer1.4, m1_lmer1.2, m1_lmer1.3,  m1_lmer1.5, m1_lmer1.6, m1_lmerFULL,
-                 m1_lmer1p, m1_lmer1.2p, m1_lmer1.3p, m1_lmer1.4p, m1_lmer1.5p, m1_lmer1.6p, m1_lmerFULLp)
+lmerTable <- BIC(m1w1_lmer0, m1w1_lmer1, m1w1_lmer2, m1w1_lmer3,
+                 m1w1_lmer1.4, m1w1_lmer1.2, m1w1_lmer1.3,  m1w1_lmer1.5, m1w1_lmer1.6, m1w1_lmerFULL,
+                 m1w1_lmer1p, m1w1_lmer1.2p, m1w1_lmer1.3p, m1w1_lmer1.4p, m1w1_lmer1.5p, m1w1_lmer1.6p, m1w1_lmerFULLp)
 ICdelta(lmerTable, IC = "BIC")
 
-# best model --------
+lmerTable <- BIC(m1w1_lmer0, m1w1_lmer1, m1w1_lmer2, m1w1_lmer3,
+                 m1w1_lmer1.4, m1w1_lmer1.2, m1w1_lmer1.3,  m1w1_lmer1.5, m1w1_lmer1.6, m1w1_lmerFULL,
+                 m1w1_lmer1p, m1w1_lmer1.2p, m1w1_lmer1.3p, m1w1_lmer1.4p, m1w1_lmer1.5p, m1w1_lmer1.6p, m1w1_lmerFULLp)
+ICdelta(lmerTable, IC = "BIC")
 
-m1_lmer1.6
-plot(m1_lmer1.6)
-plot(m1_lmer1.6, resid(., scaled=TRUE) ~ fitted(.) | Species_latin , abline = 0)
-summary(m1_lmer1.6)
+# best model (jan 3 2023)-------- 
+mod_swim<-m1w1_lmer2
+plot(mod_swim)
+plot(mod_swim, resid(., scaled=TRUE) ~ fitted(.) | Species_latin , abline = 0)
+qqmath(mod_swim)
+summary(mod_swim)
+
+# should fit overdispersion models 
 
 # assumptions, normal resid distr around predictors/ linearity: ----------
-plot(resid(m1_lmer1.6), data.model.cm$Species_latin)
-plot(resid(m1_lmer1.6), data.model.cm$LENGTH_cm)
-plot(resid(m1_lmer1.6), data.model.cm$Temp_test_mean)
+plot(resid(mod_swim), data.model.cm$Species_latin)
+plot(resid(mod_swim), data.model.cm$LENGTH_cm)
+plot(resid(mod_swim), data.model.cm$Temp_test_mean)
 
 # assumptions, homogeneous variance: ----------
-plot(m1_lmer1.6) # all data visualize, need to be symetrical, looks good
+plot(mod_swim) # all data visualized, need to be symmetrical, looks good
 # lavenes test
-lev.mod1<-lm(abs(resid(m1_lmer1.6))^2 ~ Reference_number_1, data=data.model.cm) #ANOVA of the squared residuals
-lev.mod2<-lm(abs(resid(m1_lmer1.6))^2 ~ FishID, data=data.model.cm) #ANOVA of the squared residuals
-lev.mod3<-lm(abs(resid(m1_lmer1.6))^2 ~ Species_latin, data=data.model.cm) #ANOVA of the squared residuals
-lev.mod4<-lm(abs(resid(m1_lmer1.6))^2 ~ 1, data=data.model.cm) #ANOVA of the squared residuals
+lev.mod1<-lm(abs(resid(mod_swim))^2 ~ Reference_number_1, data=data.model.cm) #ANOVA of the squared residuals
+lev.mod2<-lm(abs(resid(mod_swim))^2 ~ FishID, data=data.model.cm) #ANOVA of the squared residuals
+lev.mod3<-lm(abs(resid(mod_swim))^2 ~ Species_latin, data=data.model.cm) #ANOVA of the squared residuals
+lev.mod4<-lm(abs(resid(mod_swim))^2 ~ 1, data=data.model.cm) #ANOVA of the squared residuals
 anova(lev.mod1) # sign
 anova(lev.mod2) # sign
 anova(lev.mod3) # sign
@@ -199,20 +213,21 @@ anova(lev.mod4)
 # assumptions, normally distr residuals: ----------
 # additional fitting 
 require("lattice")
-qqnorm(resid(m1_lmer1.6))
-qqmath(m1_lmer1.6)
-qq
-plot(fitted(m1_lmer1.6)~data.model.cm$SWIM_cms)
+qqnorm(resid(mod_swim))
+qqmath(mod_swim)
+hist(data.model.cm$SWIM_cms, breaks = 100)
+plot(fitted(mod_swim)~data.model.cm$SWIM_cms)
 abline(b = 1, a =0)
 
+# looks over-dispesrsed data 
 
-data.model.cm$pred<- predict(m1_lmer1.6, type="response")
+data.model.cm$pred<- predict(mod_swim, type="response")
 
 # Fig Supl 1B. --------
 funnel<-ggplot(data.model.cm, aes(x=pred, y=SWIM_cms/pred, label = Reference_number_1))+
   geom_point(pch=21)+
   geom_hline(yintercept = 1, lty=2, color = "grey")
-  # geom_text(check_overlap = T)
+  # geom_text(chseck_overlap = T)
 ggformat(funnel, title = "", y_title = "Standard Ratio", x_title = " Expected value (cm/s)")
 funnel<-funnel +theme (axis.ticks.x = element_line(size = 1), legend.title = element_blank(), legend.key.width = unit(2, "cm"))
 funnel

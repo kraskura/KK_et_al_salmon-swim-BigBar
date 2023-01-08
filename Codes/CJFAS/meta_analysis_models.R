@@ -1,28 +1,28 @@
 
 # library(metafor)
-pkgs <- c("mgcv", "lme4", "ggplot2", "vroom", "dplyr", "forcats", "tidyr", "forestplot", "meta")
+pkgs <- c("mgcv", "lme4", "ggplot2", "vroom", "dplyr", "pryr", "forcats", "tidyr", "forestplot", "meta")
 vapply(pkgs, library, logical(1), character.only = TRUE, logical.return = TRUE,
        quietly = TRUE)
 # *************************
 
 # source: ---------
+source("/Users/kristakraskura/Github_repositories//KK_et_al_salmon-swim-BigBar/Codes/PSC/table_BIC.R")
+source("/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Codes/get_dataset.R")
 source("/Users/kristakraskura/Github_repositories/Plots-formatting/ggplot_format.R")
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/get_dataset.R")
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/table_BIC.R")
 # *************************
 
 
-# get data, housekeeping: -------------
+# 1. Get data, housekeeping: -------------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/2022_final_work/Kraskura_salmonSwim_analysis_jan2022.csv")
+  data.file = "/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Data/Files/Kraskura_salmonSwim_analysis_jan2022.csv")
 
 # available datasets:
 # return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
 
 # all but time to fatigue tests for general analysis:
 data<-as.data.frame(data.all[1])
-data<-data[!c(data$Test_performance2=="TTF"),]
 data.ttf<-data[c(data$Test_performance2=="TTF"),]
+data<-data[!c(data$Test_performance2=="TTF"),]
 
 data$Species_latin<-as.factor(data$Species_latin)
 data$Sex_F_M<-as.factor(data$Sex_F_M)
@@ -46,8 +46,8 @@ data.test.BLs.indiv<-data[data$Indiv_group=="indiv", c("Species_latin", "Year_pu
                                                        "Sex_F_M", "Temp_test_mean", "Test_performance", "Test_performance2", 
                                                        "swim_speed_MEAN_BL_s", "swim_speed_MAX_BL_s","swim_error_BLs_SD",
                                                        "N_swim_speed", "FishID", "Reference_number_1", "Duration_swim" )]
-detach(package:plyr)    
-library(dplyr)
+# detach(package:plyr)    
+# library(dplyr)
 
 # BL/s
 data.test.BLs.gr.sum<-data[data$Indiv_group=="indiv",] %>% 
@@ -117,8 +117,9 @@ for (i in 1:nrow(data.test.BLs.gr)){
 
 # data.test1<-data.test1[complete.cases(data.test1),]
 # data.test.BL<-data.test.BLs.gr[!is.na(data.test.BLs.gr$N_swim_speed) & !is.na(data.test.BLs.gr$swim_speed_MEAN_BL_s) ,]
-data.test.BL[, c("N_swim_speed","swim_error_BLs_SD","swim_speed_MEAN_BL_s" )]
 data.test.BL<-data.test.BLs.gr[!is.na(data.test.BLs.gr$swim_speed_MEAN_BL_s) ,]
+data.test.BL[, c("N_swim_speed","swim_error_BLs_SD","swim_speed_MEAN_BL_s" )]
+
 dat.BL<-data.test.BL
 dat.BL$Reference_number_1<-factor(dat.BL$Reference_number_1)
 dat.BL$Species_latin<-factor(dat.BL$Species_latin)
@@ -147,8 +148,9 @@ for(i in 1:nrow(dat.BL)){
 }
 
 # data.test.cm<-data.test.cms.gr[!is.na(data.test.cms.gr$N_swim_speed) & !is.na(data.test.cms.gr$SWIM_cms_SD) & !is.na(data.test.cms.gr$SWIM_cms) & !is.na(data.test.cms.gr$Key_origin) , ]
-data.test.cm[, c("N_swim_speed","SWIM_cms_SD","SWIM_cms" )]
 data.test.cm<-data.test.cms.gr[ !is.na(data.test.cms.gr$SWIM_cms) , ]
+data.test.cm[, c("N_swim_speed","SWIM_cms_SD","SWIM_cms" )]
+
 dat.cm<-data.test.cm
 dat.cm$Reference_number_1<-factor(dat.cm$Reference_number_1)
 dat.cm$Species_latin<-factor(dat.cm$Species_latin)
@@ -210,6 +212,7 @@ is.na(dat.cm$Species_latin2)
 dat.cm[dat.cm$SWIM_cms>300,]
 dat.cm$Species_latin<-factor(dat.cm$Species_latin)
 
+## 1.1. Plot and visualize all data -----
 ggplot(data=dat.cm, aes(x = xi, y = yi, size = size, shape = Species_latin))+
   # geom_text(mapping= aes( x = xi, y=5), size = 2)+
   # geom_hline(yintercept =100, linetype=2, col = "grey", lwd=0.5)+
@@ -351,7 +354,7 @@ ggplot(data=dat.BL, aes(x = xii, y = yi, size=size))+
   geom_point(data = subset(dat.BL, !is.na(Species_latin)) , mapping = aes(x = xii, y = yi, color = Temp_test_mean), fill = "white", stroke=0.5)+
   geom_point(data =  subset(dat.BL, !is.na(Species_latin)), aes(col=Temp_test_mean, fill=Temp_test_mean),  stroke=0.5, show.legend = FALSE)+
   xlab('')+ 
-  ylim(0, 800)+
+  # ylim(0, 800)+
   ylab(expression(Swim[Relat]~speed~(cm/s)))+
   scale_color_viridis_c()+
   scale_fill_viridis_c()+
@@ -374,7 +377,7 @@ ggplot(data=dat.BL, aes(x = xii, y = yi, size=size))+
 
 
 
-# # metaanalysis MODELS - not using  -------
+# 2. Meta-Analysis models - [not used in the main text]  -------
 # model dataset ***********************
 # https://stats.stackexchange.com/questions/156754/method-of-meta-analysis-of-studies-to-determine-mean-blood-level
 # 1. sampling variances of the means
@@ -389,7 +392,7 @@ dat.cm <- escalc(measure="MN", mi=SWIM_cms, sdi=SWIM_cms_SD,
                  ni=N_swim_speed, data=data.test.cm)
 
 
-# LINEAR models -------
+## rma.mv models -------
 # https://stats.stackexchange.com/questions/116659/mixed-effects-meta-regression-with-nested-random-effects-in-metafor-vs-mixed-mod
 mod0 <- rma.mv(yi, vi, mods = ~ 1, random = list(~1|Reference_number_1, ~1|Key_origin), method = "ML",  data=dat.cm)
   mod1 <- rma.mv(yi, vi, mods = ~ Temp_test_mean, random = list(~1|Reference_number_1, ~1|Key_origin),method = "ML",  data=dat.cm)
@@ -404,7 +407,7 @@ bictable<-BIC(mod0 , mod1, mod2, mod3, mod5, mod2.1,mod3.1)
 BICdelta(bictable)
 
 
-# Diagnostics ----------
+# 3. Diagnostics ----------
 # best
 model<-mod5 ### !!! enter best model here 
 summary(model)
@@ -427,16 +430,18 @@ forest(dat.cm$yi, dat.cm$vi,
 ### draw points one more time to make them easier to see
 points(sort(dat.cm$yi), nrow(dat.cm):1, pch=19, cex=0.5)
 
-# NON-LINEAR models ---------
+
+
+# NON-LINEAR models
 # https://www.metafor-project.org/doku.php/tips:non_linear_meta_regression
 
 
 
-# the variance/weight in model  -------
+## the variance/weight in model  -------
 wi   <- 1/sqrt(dat.cm$vi)
 size <- 0.5 + 1.2 * (wi - min(wi))/(max(wi) - min(wi)) # << size for the plot ta show this 
 
-# predict model and CIs ---------
+## predict model and CIs ---------
 pred1 <- predict(model)
 dat.cm$model<-pred1$pred
 dat.cm$model.ci.lb<-pred1$ci.lb
@@ -445,7 +450,7 @@ dat.cm$model.ci.ub<-pred1$ci.ub
 
 # forest plot to visualize results -------
 # https://rstudio-pubs-static.s3.amazonaws.com/10913_5858762ec84b458d89b0f4a4e6dd5e81.html
-# forest(mod.temp.1, slab = paste(data.test.BL$Reference_number_1, as.character(data.test.BL$year), sep = ", "))
+forest(mod.temp.1, slab = paste(data.test.BL$Reference_number_1, as.character(data.test.BL$year), sep = ", "))
 # forest(mod1, slab = paste(data.test.BL$Reference_number_1, as.character(data.test.BL$year), sep = ", "))
 
 # funnel plot --------

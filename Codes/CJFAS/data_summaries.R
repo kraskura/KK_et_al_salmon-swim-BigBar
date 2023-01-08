@@ -1,9 +1,11 @@
-
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/get_dataset.R")
+# (jan 3 2023)
+# 0. source data and code: ---------
+source("/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Codes/get_dataset.R")
 source("/Users/kristakraskura/Github_repositories/Plots-formatting/ggplot_format.R")
 
+# 1. import and wrangle the data -------------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/2022_final_work/Kraskura_salmonSwim_analysis_jan2022.csv")
+  data.file = "/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Data/Files/Kraskura_salmonSwim_analysis_jan2022.csv")
 
 # return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
 
@@ -13,14 +15,14 @@ data<-as.data.frame(data.all[1])
 
 # overall data stats:
 # 1. Atlantic and mykiss
-length(which(data$Species_latin == "Salmo salar")) # 253 (feb 11, 2022)
-length(which(data$Species_latin == "Oncorhynchus mykiss")) #134 (feb 11 2022)
-# 2. N studies:
+length(which(data$Species_latin == "Salmo salar")) # 418 (jan 3 2023)
+length(which(data$Species_latin == "Oncorhynchus mykiss")) # 206 (jan 3 2023)
+# 2. N studies: # 97 (jan 3 2023)
 length(unique(data$Reference_number_1))
-nrow(data)
+# 3. N data points 
+nrow(data) # 1809 (jan 3 2023)
 
 
-# datasets --------
 # data<-data[!c(data$Test_performance2=="TTF"),]
 # data.ttf<-data[c(data$Test_performance2=="TTF"),]
 
@@ -35,12 +37,12 @@ data[col_names] <- lapply(data[col_names] , factor)
 # *******************************************
 # how many are estimated? what is estimated:
 
-length(data$SWIM_cms_source[which(data$SWIM_cms_source=="estimated")])
-length(data$SWIM_cms_source[which(data$SWIM_cms_source=="reported")])
+length(data$SWIM_cms_source[which(data$SWIM_cms_source=="estimated")]) # 755 (jan 3 2023)
+length(data$SWIM_cms_source[which(data$SWIM_cms_source=="reported")]) # 1009 (jan 3 2023)
 
-data$length_speed_source<-paste("CM=", data$Length_cm_value_source, "-CM.S=", data$SWIM_cms_source,sep="")
+data$length_speed_source<-paste("FL=", data$Length_cm_value_source, "-Speed=", data$SWIM_cms_source,sep="")
 
-# length estimated, swim speed estimated ------------------------
+## 1.1. size and swim estimations ------------------------
 est<-data[which(data$Length_cm_value_source == "estimated" &
                   is.na(data$Length_MEAN_cm) & 
                   is.na(data$swim_speed_MEAN_cm_s) &  # <<<<<< 
@@ -77,18 +79,9 @@ total<-data[which(!is.na(data$SWIM_cms)),
 nrow(total) == nrow(est)+nrow(est2)+nrow(rep)+nrow(rep2)
 
 
-# data estimate summaries ***************************************************
-# # estimate fishes swimming capacity from BL/s to cm/s
-# data$fish_swim_cm_s_ESTIMATED<-data$swim_speed_MEAN_BL_s * data$Length_MEAN_cm # all original data from the paper
-# nrow(data[c(!is.na(data$fish_swim_cm_s_ESTIMATED) & is.na(data$swim_speed_MEAN_cm_s)),]) # added 290 data points using this analysis
-# nrow(data[c(!is.na(data$fish_swim_cm_s_ESTIMATED) & is.na(data$swim_speed_MEAN_cm_s) & data$Indiv_group=="indiv"),]) #  analysis # 209 from individual
-# nrow(data[c(!is.na(data$fish_swim_cm_s_ESTIMATED) & is.na(data$swim_speed_MEAN_cm_s) & data$Indiv_group=="group"),]) #  analysis # 81 from group :( - not good estimates
-# 
-# data$fish_swim_cm_s_ESTIMATED_2<-data$swim_speed_MEAN_BL_s * data$Length_cm_estimated # estimated length using fishbase relationships
-# nrow(data[c(!is.na(data$fish_swim_cm_s_ESTIMATED_2) & is.na(data$swim_speed_MEAN_cm_s)),]) 
-# data[,c("fish_swim_cm_s_ESTIMATED","fish_swim_cm_s_ESTIMATED_2", "swim_speed_MEAN_cm_s", "Length_MEAN_cm","Length_cm_estimated", "Length_cm_value")] # compare how different these are
-# 
-# data[,c("Species_latin", "Size_MEAN_kg", "Length_MEAN_cm","Size_kg_estimated", "Length_cm_estimated", "Size_kg_value", "Length_cm_value")]
+# 2. mini stats and numbers ------
+data.cm.ucrit<-data.cm[data.cm$Test_performance2=="Ucrit" | data.cm$Test_performance2=="Umax",]
+data.cm.field<-data.cm[data.cm$Test_performance2=="Field",]
 
 # how many studies? 
 length(unique(data$Reference_number)) 
@@ -96,7 +89,7 @@ length(unique(data$Reference_number))
 
 # get reference list to report 
 data.UniqueRef<-data[!duplicated(data$Reference_number_1),c("Reference_number_1", "Reference_2")]
-paste(data.UniqueRef$Reference_number_1, ": ", data.UniqueRef$Reference_2, sep = "")
+# paste(data.UniqueRef$Reference_number_1, ": ", data.UniqueRef$Reference_2, sep = "")
 
 # reported % vals > 2 BL 
 nrow(data.BL[!is.na(data.BL$swim_speed_MEAN_BL_s) & data.BL$swim_speed_MEAN_BL_s > 2, ])/ nrow(data.BL[!is.na(data.BL$swim_speed_MEAN_BL_s), ])
@@ -109,10 +102,6 @@ nrow(data.cm[c(!is.na(data.cm$SWIM_cms) & data.cm$SWIM_cms < 200 & data.cm$Speci
 nrow(data[data$Sex_F_M == "F",])
 nrow(data[data$Sex_F_M == "M",])
 nrow(data[data$Sex_F_M == "mixed",])
-
-# reported: range swimming performance test and sex specific
-data.cm.ucrit<-data.cm[data.cm$Test_performance2=="Ucrit" | data.cm$Test_performance2=="Umax",]
-data.cm.field<-data.cm[data.cm$Test_performance2=="Field",]
 
 summary(data.cm[data.cm.ucrit$Sex_F_M == "F","SWIM_cms"], na.rm = T)
 summary(data.cm[data.cm.ucrit$Sex_F_M == "M","SWIM_cms"], na.rm = T)
@@ -137,42 +126,51 @@ unique(data$Fish_Conditions)
 unique(data$Surgery)
 
 # different Fish conditions 
-unique(data$Condition_category)
+# 
+# unique(data$Condition_category)
+# summary(data$Condition_category)
+
 unique(as.factor(data$Test_performance2))
-summary(data$Condition_category)
 summary(as.factor(data$Test_performance2))
 summary(as.factor(data$Test_performance))
 
 
+# reported: N from Umax, N from Ucrit
+nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus gorbuscha" & data.cmT.use$Test_performance2 == "Umax"),]) # 132 (jan 3 2023)
+nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus gorbuscha" & data.cmT.use$Test_performance2 == "Ucrit"),]) # 50 (jan 3 2023)
+nrow(data.cmT.use[(data.cmT.use$Species_latin == "Oncorhynchus gorbuscha" ),]) # 191 (jan 3 2023)
 
 
 
-# data estimate summaries  ----------
+
+# 3. data estimate summaries  ----------
 # ****************************************************
-# by species
-data.cm<-data[!is.na(data$swim_speed_MEAN_cm_s),]
-data.BL<-data[!is.na(data$swim_speed_MEAN_BL_s),]
-
+## 3.1. by species BL/s, cm/s-----
 # datapoints SWIM cm/.s estimated, or reported, usen in all figs etc
 data_sum5_ALL<-as.data.frame(data[!is.na(data$SWIM_cms),] %>% 
                            group_by(Species_latin) %>% 
                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
                                              studies = paste(unique(Reference_number_1), collapse = ', ')))
-#datapoints cm/s
-data_sum5<-as.data.frame(data.cm %>% 
+#datapoints cm/s reported by author
+data_sum5<-as.data.frame(data %>%
+                           filter(!is.na(swim_speed_MEAN_cm_s)) %>% 
                            group_by(Species_latin) %>% 
                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
                                              studies = paste(unique(Reference_number_1), collapse = ', ')))
-#datapoints BL
-data_sum5dpBL<-as.data.frame(data.BL %>% 
-                               group_by(Species_latin) %>% 
-                               dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                                 studies = paste(unique(Reference_number_1), collapse = ', ')))
 
-data_sum5bothswim<-as.data.frame(data[c(!is.na(data$swim_speed_MEAN_BL_s) & !is.na(data$SWIM_cms)),] %>% 
+#datapoints BL reported by author 
+data_sum5dpBL<-as.data.frame(data %>%
+                            filter(!is.na(swim_speed_MEAN_BL_s)) %>%  
+                            group_by(Species_latin) %>% 
+                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
+                                              studies = paste(unique(Reference_number_1), collapse = ', ')))
+
+data_sum5bothswim<-as.data.frame(data[c(!is.na(data$swim_speed_MEAN_BL_s) & !is.na(data$swim_speed_MEAN_cm_s)),] %>% 
                                    group_by(Species_latin) %>% 
                                    dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
                                                      studies = paste(unique(Reference_number_1), collapse = ', ')))
+
+
 data_sum5_ALL$swim_units<-"CM_S_ALL"
 data_sum5$swim_units<-"cm.s"
 data_sum5dpBL$swim_units<-"BL.s"
@@ -181,11 +179,12 @@ refs_n<-rbind(data_sum5_ALL, data_sum5, data_sum5dpBL, data_sum5bothswim)
 
 # merged_dsum5<-merge(merge(data_sum5dpBL,data_sum5,  by = "Species_latin", all.x = T),data_sum5bothswim,  by = "Species_latin", all.x = T)
 # save for MS
-write.csv(file="/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/SUPL_table1_summary_MAY2022.csv", refs_n, row.names=FALSE)
+write.csv(file="../../ms_exports/Tables/SUPL_table1_summary.csv", refs_n, row.names=FALSE)
 
-# recovery studies, data points 
-# the info here has been updated in late june 2020, went through all studies to see which studies report address recovery 
-# ***
+
+
+
+## 3.2. recovery studies, data points ---------
 data_sum6<-as.data.frame(data[c(!is.na(data$SWIM_cms) & !data$Recovery=="0"),] %>% 
                            group_by(Test_performance2, Recovery) %>% 
                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
@@ -202,7 +201,7 @@ data_sum6<-as.data.frame(data  %>%
                                                  studies = paste(unique(Reference_number_1), collapse = ', ')))
 
 # ***********************************************************
-# max speed table species ---- 
+## 3.3. max speed table species ---- 
 swim_max<-data %>% 
   group_by(Species_latin) %>% 
   dplyr:::summarise(mean_max= max(SWIM_cms, na.rm=TRUE))
@@ -250,7 +249,7 @@ data_sum_species_Fig6 <- data %>%
 
 
 
-# Main MS Table 1 -------------------
+## 3.4. main MS Table 1 -------------------
 # by species - USING MEANS ONLY
 data_sum_species_test.cm<-data.cm %>% 
   group_by(Species_latin, Test_performance2) %>% 
@@ -299,11 +298,11 @@ data_sum_species_test.BL<-data.BL %>%
 #                     n_studies_total=length(unique(Reference_number_1)))
 
 
-as.data.frame(data_sum_species_test.BL) # reported 
-as.data.frame(data_sum_species_test.cm) # reported 
-write.csv(file="/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/Table2_swim_BLsummaryMAY2022.csv",
+# as.data.frame(data_sum_species_test.BL) # reported 
+# as.data.frame(data_sum_species_test.cm) # reported 
+write.csv(file="../../ms_exports/Tables/Table2_swim_BLsummary.csv",
           data_sum_species_test.BL, row.names=FALSE)
-write.csv(file="/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/Table2_swim_cmsummaryMAY2022.csv",
+write.csv(file="../../ms_exports/Tables/Table2_swim_cmsummary.csv",
           data_sum_species_test.cm, row.names=FALSE)
 # ***********************************************************
 
@@ -312,7 +311,7 @@ write.csv(file="/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/M
 
 
 # ***********************************************************
-# SI table 4 ---------
+## 3.5. SI table 4 ---------
 # summarize all of this by the study, give refs, all levels (category --> smallest level)
   # split_swimcond<-split(data, data$Swim_Conditions2)
   # # select needed columns
@@ -388,7 +387,7 @@ data_sumFishCond<-as.data.frame(data %>%
 
 
 # ***********************************************************
-# SI Table 7 ------------
+## 3.6. SI Table 7 ------------
 # by Fish condition, man subgroup - USING MEANS ONLY
 data_sum_cond.cm<-data.cm %>% 
   group_by(Fish_Conditions) %>% 
@@ -425,10 +424,20 @@ data_sum_cond.BL<-data.BL %>%
   as.data.frame()
 
 
-write.csv(file="/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/SI_Table8_FishCondswim_BLMAY2022.csv",
+write.csv(file="../../ms_exports/Tables/SI_Table8_FishCondswim_BL.csv",
           data_sum_cond.BL, row.names=FALSE)
-write.csv(file="/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/SI_Table7_FishCondswim_cmMAY2022.csv",
+write.csv(file="../../ms_exports/Tables/SI_Table7_FishCondswim_cm.csv",
           data_sum_cond.cm, row.names=FALSE)
+
+
+datF.sum<-dataF %>% 
+  group_by(cond, Species_latin) %>% 
+  summarize(mean_swim = mean(SWIM_cms, na.rm =TRUE))
+  
+ggplot(datF.sum, aes(y = mean_swim, x = Species_latin , color = Species_latin, group = cond))+
+  geom_point( size=3 )+
+  geom_text( aes(y = mean_swim, x = Species_latin, label=cond))+
+  facet_wrap(.~Species_latin, nrow=2, scales = "free_x")
 
 
 

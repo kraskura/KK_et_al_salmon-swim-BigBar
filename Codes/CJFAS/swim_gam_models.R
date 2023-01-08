@@ -3,18 +3,20 @@
 pkgs <- c("mgcv", "mgcViz", "lme4", "ggplot2", "vroom", "dplyr", "forcats", "tidyr", "forestplot", "meta", "ggsci")
 vapply(pkgs, library, logical(1), character.only = TRUE, logical.return = TRUE,
        quietly = TRUE)
+library(simr)
+install.packages("mgcViz")
 # *************************
 
-# source: ---------
+# 0. source data and code: ---------
+source("/Users/kristakraskura/Github_repositories//KK_et_al_salmon-swim-BigBar/Codes/PSC/table_BIC.R")
+source("/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Codes/get_dataset.R")
 source("/Users/kristakraskura/Github_repositories/Plots-formatting/ggplot_format.R")
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/get_dataset.R")
-source("/Users/kristakraskura/Github_repositories/Salmon-swim-BigBar/Codes/table_BIC.R")
 # *************************
 
 
-# get data, housekeeping: -------------
+# 1. import and wrangle the data -------------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "/Users/kristakraskura/Desktop/BOX/UCSB/Research/Pacific Salmon/Manuscr Swimming Lit Rev /Data files/2022_final_work/Kraskura_salmonSwim_analysis_jan2022.csv")
+  data.file = "/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Data/Files/Kraskura_salmonSwim_analysis_jan2022.csv")
 
 # available datasets:
 # return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
@@ -241,7 +243,7 @@ m1_lmer1.6 <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin +  (1 |
 
 m1_lmerFULL <- lmer(SWIM_cms ~ Temp_test_mean + LENGTH_cm + Species_latin + Sex_F_M + (1 | FishID) + (1 | Reference_number_1), data = data.model, REML = FALSE, weights = 1/vi)
 
-library(simr)
+
 powerSim(m1_lmer1, nsim = 10)
 powerSim(m1_lmer1, fixed("Temp_test_mean"), nsim = 10)
 
@@ -291,8 +293,8 @@ ICdelta(modTable, IC = "BIC")
 
 
 # best GAM model: -------
-m3_gam1
-b<-m3_gam1
+
+b<-m1_gam4
 summary(b)
 
 # GAM checking ---------
@@ -330,7 +332,7 @@ qq(viz.b1, rep = 20, showReps = T, CI = "none", a.qqpoi = list("shape" = 19), a.
 
 # predict
 preddf <- expand.grid(Temp_test_mean = seq(1, 30, 1), LENGTH_cm = (50), Species_latin = levels(data.model$Species_latin),
-                      Reference_number_1 = 0)
+                      Sex_F_M = levels(data.model$Sex_F_M), Reference_number_1 = 0)
 f <- predict.gam(b, newdata=preddf, se.fit = TRUE)
 preddf$fit<-as.data.frame(f[1])
 preddf$fitSE<-as.data.frame(f[2])
@@ -358,7 +360,7 @@ ggplot(data.model, aes(y=SWIM_cms, x=Temp_test_mean, color = Species_latin, fill
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
                     values = c("grey", "#EA573D", "#D292CD", "#FB9A62", "#FBC063", "#70Af81", "#64B0BC","#446699", "#615B70"))+  theme_light()+
   facet_wrap(.~Species_latin)+
-  geom_line(data = preddf, aes(x=Temp_test_mean, y = fit, color = Species_latin, group = Species_latin))
+  geom_line(data = preddf, aes(x=Temp_test_mean, y = fit, color = Species_latin, group = interaction(Species_latin, Sex_F_M)))
 
 
 
