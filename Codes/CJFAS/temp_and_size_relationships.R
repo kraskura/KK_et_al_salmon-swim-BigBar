@@ -11,6 +11,7 @@ library(broom)
 # detach(name = plyr)
 library(merTools) # for CI of lmer models 
 library(dplyr)
+library(lattice)
 
 source("/Users/kristakraskura/Github_repositories/KK_et_al_salmon-swim-BigBar/Codes/get_dataset.R")
 source("/Users/kristakraskura/Github_repositories/Plots-formatting/ggplot_format.R")
@@ -36,7 +37,6 @@ data.cm$Reference_number_1<-factor(data.cm$Reference_number_1)
 # field data 
 dataF<-as.data.frame(data.all[7])
 dataLab<-as.data.frame(data.all[8])
-dataLab.use<-dataLab[!c(is.na(dataLab$Temp_test_mean) | is.na(dataLab$SWIM_cms)),] # exclude NAs from SWIM_cms (n=2), and those without temperature
 
 # sanity check everything is subset correctly 
 nrow(dataF) + nrow(dataLab) == nrow(data) + nrow(data.ttf)
@@ -134,7 +134,6 @@ size.field.l.slope<-round(fixef(mod.size.field.l)[2], 2)
 size.field.l.n<-unlist(summary(mod.size.field.l)[[3]][2])[1]
 
 # *********** END *************************************
-
 
 
 
@@ -282,50 +281,50 @@ data.cm.tunnel.sp %>%
   do(broom::tidy(lm(SWIM_cms~ LENGTH_cm, ., na.action=na.exclude))) %>% 
   ungroup()
 
-## 3.4. Lab swim speeds: species-specific, cm/s ---------
-# ******************************************************
-# species specific fits, CI of models, resid plots
-# 1. pink : "Oncorhynchus gorbuscha"
-mod.size.Lab.pink<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus gorbuscha"),])
-CI.Labpink<-confint(mod.size.Lab.pink)
-# plot(mod.size.Lab.pink)
-data.pred.CI.Lab.pink<-as.data.frame(predict(mod.size.Lab.pink, interval = "confidence")) 
-
-# 2. sockeye: Oncorhynchus nerka
-mod.size.Lab.soc<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus nerka"),])
-CI.Labsoc<-confint(mod.size.Lab.soc)
-# plot(mod.size.Lab.soc)
-data.pred.CI.Lab.soc<-as.data.frame(predict(mod.size.Lab.soc, interval = "confidence")) 
-
-# 3. trouts: Oncorhynchus mykiss
-mod.size.Lab.trouts<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus mykiss"),])
-CI.Labtrouts<-confint(mod.size.Lab.trouts)
-# plot(mod.size.Lab.trouts)
-data.pred.CI.Lab.trouts<-as.data.frame(predict(mod.size.Lab.trouts, interval = "confidence")) 
-
-# 4. chinook: Oncorhynchus tshawytscha
-mod.size.Lab.chin<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus tshawytscha"),])
-CI.Labchin<-confint(mod.size.Lab.chin)
-# plot(mod.size.Lab.chin) 
-data.pred.CI.Lab.chin<-as.data.frame(predict(mod.size.Lab.chin, interval = "confidence")) 
-
-# 5. chum: Oncorhynchus keta
-mod.size.Lab.chum<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus keta"),])
-CI.Labchum<-confint(mod.size.Lab.chum)
-# plot(mod.size.Lab.chum)
-data.pred.CI.Lab.chum<-as.data.frame(predict(mod.size.Lab.chum, interval = "confidence")) 
-
-# 6. Atlantics: Salmo salar
-mod.size.Lab.salar<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Salmo salar"),])
-CI.Labsalar<-confint(mod.size.Lab.salar)
-# plot(mod.size.Lab.salar)
-data.pred.CI.Lab.salar<-as.data.frame(predict(mod.size.Lab.salar, interval = "confidence")) 
-
-# 7. coho : "Oncorhynchus kisutch"
-mod.size.Lab.coho<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus kisutch"),])
-CI.Labcoho<-confint(mod.size.Lab.coho)
-# plot(mod.size.Lab.coho)
-data.pred.CI.Lab.coho<-as.data.frame(predict(mod.size.Lab.coho, interval = "confidence")) 
+      # ## 3.4. Lab swim speeds: species-specific, cm/s ---------
+      # # ******************************************************
+      # # species specific fits, CI of models, resid plots
+      # # 1. pink : "Oncorhynchus gorbuscha"
+      # mod.size.Lab.pink<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus gorbuscha"),])
+      # CI.Labpink<-confint(mod.size.Lab.pink)
+      # # plot(mod.size.Lab.pink)
+      # data.pred.CI.Lab.pink<-as.data.frame(predict(mod.size.Lab.pink, interval = "confidence")) 
+      # 
+      # # 2. sockeye: Oncorhynchus nerka
+      # mod.size.Lab.soc<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus nerka"),])
+      # CI.Labsoc<-confint(mod.size.Lab.soc)
+      # # plot(mod.size.Lab.soc)
+      # data.pred.CI.Lab.soc<-as.data.frame(predict(mod.size.Lab.soc, interval = "confidence")) 
+      # 
+      # # 3. trouts: Oncorhynchus mykiss
+      # mod.size.Lab.trouts<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus mykiss"),])
+      # CI.Labtrouts<-confint(mod.size.Lab.trouts)
+      # # plot(mod.size.Lab.trouts)
+      # data.pred.CI.Lab.trouts<-as.data.frame(predict(mod.size.Lab.trouts, interval = "confidence")) 
+      # 
+      # # 4. chinook: Oncorhynchus tshawytscha
+      # mod.size.Lab.chin<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus tshawytscha"),])
+      # CI.Labchin<-confint(mod.size.Lab.chin)
+      # # plot(mod.size.Lab.chin) 
+      # data.pred.CI.Lab.chin<-as.data.frame(predict(mod.size.Lab.chin, interval = "confidence")) 
+      # 
+      # # 5. chum: Oncorhynchus keta
+      # mod.size.Lab.chum<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus keta"),])
+      # CI.Labchum<-confint(mod.size.Lab.chum)
+      # # plot(mod.size.Lab.chum)
+      # data.pred.CI.Lab.chum<-as.data.frame(predict(mod.size.Lab.chum, interval = "confidence")) 
+      # 
+      # # 6. Atlantics: Salmo salar
+      # mod.size.Lab.salar<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Salmo salar"),])
+      # CI.Labsalar<-confint(mod.size.Lab.salar)
+      # # plot(mod.size.Lab.salar)
+      # data.pred.CI.Lab.salar<-as.data.frame(predict(mod.size.Lab.salar, interval = "confidence")) 
+      # 
+      # # 7. coho : "Oncorhynchus kisutch"
+      # mod.size.Lab.coho<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus kisutch"),])
+      # CI.Labcoho<-confint(mod.size.Lab.coho)
+      # # plot(mod.size.Lab.coho)
+      # data.pred.CI.Lab.coho<-as.data.frame(predict(mod.size.Lab.coho, interval = "confidence")) 
 
 # summary of all fits 
 dataLab.sp<-dataLab[!(dataLab$Species_latin == "Oncorhynchus masou"),]
@@ -339,13 +338,19 @@ dataLab.sp %>%
 # *********** END **************************************
 
 
-
 # ******************************************************
 # 4. Temperature: mixed models ------------
-## 4.1. Tunnel, Lab swim TPCs, lmer  w/ species random intercept ------
+# 4.1. Size standardize  _________________-
+scaling_slope_TL <- fixef(mod.size.lab)[2]
+dataLab$LENGTH_cm_scaled<-55
+dataLab$SWIM_cms_scaled<- dataLab$SWIM_cms + (scaling_slope_TL * ( dataLab$LENGTH_cm -dataLab$LENGTH_cm_scaled) )  
+# data set for temp perf curves 
+dataLab.use<-dataLab[!c(is.na(dataLab$Temp_test_mean) | is.na(dataLab$SWIM_cms) | is.na(dataLab$LENGTH_cm)),] # exclude NAs from SWIM_cms (n=2), and those without temperature
+
+## 4.2. Tunnel, Lab swim TPCs, lmer  w/ species random intercept ------
 # Ucrit, Umax, and 'Swim' and 'jump' data as recorded; NOT Field:
-mod.tmep.Lab<-lmer(SWIM_cms ~ poly(Temp_test_mean, 2, raw = TRUE) + (1|Species_latin), data = dataLab.use, REML = FALSE)
-mod.tmep.Lab3<-lmer(SWIM_cms ~ poly(Temp_test_mean, 3, raw = TRUE) + (1|Species_latin), data = dataLab.use, REML = FALSE)
+mod.tmep.Lab<-lmer(SWIM_cms_scaled ~ poly(Temp_test_mean, 2, raw = TRUE) + (1|Species_latin), data = dataLab.use, REML = FALSE)
+mod.tmep.Lab3<-lmer(SWIM_cms_scaled ~ poly(Temp_test_mean, 3, raw = TRUE) + (1|Species_latin), data = dataLab.use, REML = FALSE)
 
 BIC(mod.tmep.Lab3, mod.tmep.Lab)# 2nd order poly is better
 
@@ -354,57 +359,11 @@ temp.sumI<-dataLab.use %>%
   dplyr::group_by(Species_latin) %>%
   summarise(n=n(), mintemp = min(Temp_test_mean), maxtemp = max(Temp_test_mean), n_studies = length(unique(Reference_number_1)))
 
-## 4.3. Species-specific, raw swim TPCs -----
-# 1. pink : "Oncorhynchus gorbuscha"
-modI.pink<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus gorbuscha"),])
-CI.tempI.pink<-confint(modI.pink)
-summary(modI.pink)
-# plot(modI.pink)
-data.pred.CI.tempI.pink<-as.data.frame(predict(modI.pink, interval = "confidence")) 
-
-# 2. sockeye: Oncorhynchus nerka
-modI.soc<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus nerka"),])
-CI.tempI.soc<-confint(modI.soc)
-summary(modI.soc)
-plot(modI.soc)
-data.pred.CI.tempI.soc<-as.data.frame(predict(modI.soc, interval = "confidence")) 
-
-# 3. trouts: Oncorhynchus mykiss
-modI.trouts<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus mykiss"),])
-CI.tempI.trouts<-confint(modI.trouts)
-summary(modI.trouts)
-# plot(modI.trouts)
-data.pred.CI.tempI.trouts<-as.data.frame(predict(modI.trouts, interval = "confidence")) 
-
-# 4. chinook: Oncorhynchus tshawytscha
-modI.chin<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus tshawytscha"),])
-CI.tempI.chin<-confint(modI.chin)
-summary(modI.chin)
-# plot(modI.chin) 
-data.pred.CI.tempI.chin<-as.data.frame(predict(modI.chin, interval = "confidence")) 
-
-# 5. coho: Oncorhynchus kisutch
-modI.coho<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus kisutch"),])
-CI.tempI.coho<-confint(modI.coho)
-summary(modI.coho)
-# plot(modI.coho) 
-data.pred.CI.tempI.coho<-as.data.frame(predict(modI.coho, interval = "confidence")) 
-
-# 6. Atlantic: Salmo salar
-modI.salar<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Salmo salar"),])
-summary(modI.salar)
-# plot(modI.salar) 
-
-# 7 Chum 
-modI.chum<-lm(SWIM_cms~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus keta"),])
-summary(modI.chum)
-# plot(modI.salar) 
-
 # summary of all fits
 # actual data << REPORTED 
 dataLab.use %>%
   dplyr::group_by(Species_latin) %>%
-  do(broom::tidy(lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T), ., na.action=na.exclude))) %>% 
+  do(broom::tidy(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, ., na.action=na.exclude))) %>% 
   ungroup() %>% 
   as.data.frame()
 # ******************************************************
@@ -433,81 +392,55 @@ species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchu
 species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus keta"),],
                    model=mod.size.field.chum,
                    species="Oncorhynchus keta",
-                   sum.file=size.sum.field,
-                   test = "field")
+                   sum.file=size.sum.field)
 
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Oncorhynchus gorbuscha"),],
-                   model=mod.size.Lab.pink,
-                   species="Oncorhynchus gorbuscha",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Oncorhynchus tshawytscha"),],
-                   model=mod.size.Lab.chin,
-                   species="Oncorhynchus tshawytscha",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Oncorhynchus nerka"),],
-                   model=mod.size.Lab.soc,
-                   species="Oncorhynchus nerka",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Oncorhynchus mykiss"),],
-                   model=mod.size.Lab.trouts,
-                   species="Oncorhynchus mykiss",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Oncorhynchus keta"),],
-                   model=mod.size.Lab.chum,
-                   species="Oncorhynchus keta",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Salmo salar"),],
-                   model=mod.size.Lab.salar,
-                   species="Salmo salar",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
-species.size.plots(dd=dataLab[(dataLab$Species_latin == "Oncorhynchus kisutch"),],
-                   model=mod.size.Lab.coho,
-                   species="Oncorhynchus kisutch",
-                   sum.file=size.sum.Lab, 
-                   test = "lab")
+# Lab temp only, (standardised size, no size)
+species.temp.size.fits(species = "Oncorhynchus gorbuscha", 
+                   temp.sum = temp.sumI, 
+                   dataform = "raw",
+                   scale.fish.size = T)
+species.temp.size.fits(species = "Oncorhynchus nerka",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw", scale.fish.size = T)
+species.temp.size.fits(species = "Oncorhynchus kisutch",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw",scale.fish.size = T)
+species.temp.size.fits(species = "Salmo salar",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw",scale.fish.size = T)
+species.temp.size.fits(species = "Oncorhynchus mykiss",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw",scale.fish.size = T)
+species.temp.size.fits(species = "Oncorhynchus tshawytscha",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw",scale.fish.size = T)
+species.temp.size.fits(species = "Oncorhynchus keta",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw",scale.fish.size = T)
 
+# raw with size in the model 
+species.temp.size.fits(species = "Oncorhynchus gorbuscha", 
+                   temp.sum = temp.sumI, 
+                   dataform = "raw")
+species.temp.size.fits(species = "Oncorhynchus nerka",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw")
+species.temp.size.fits(species = "Oncorhynchus kisutch",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw")
+species.temp.size.fits(species = "Salmo salar",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw")
+species.temp.size.fits(species = "Oncorhynchus mykiss",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw")
+species.temp.size.fits(species = "Oncorhynchus tshawytscha",
+                   temp.sum = temp.sumI, 
+                   dataform = "raw")
+species.temp.size.fits(species = "Oncorhynchus keta",
+                   temp.sum = temp.sumI,
+                   dataform = "raw")
 
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus gorbuscha"),],
-                   model = modI.pink,
-                   species = "Oncorhynchus gorbuscha", 
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus nerka"),],
-                   model = modI.soc,
-                   species = "Oncorhynchus nerka",
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus kisutch"),],
-                   model = modI.coho,
-                   species = "Oncorhynchus kisutch",
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Salmo salar"),],
-                   model = modI.salar,
-                   species = "Salmo salar",
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus mykiss"),],
-                   model = modI.trouts,
-                   species = "Oncorhynchus mykiss",
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus tshawytscha"),],
-                   model = modI.chin,
-                   species = "Oncorhynchus tshawytscha",
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
-species.temp.plots(dd = dataLab.use[(dataLab.use$Species_latin == "Oncorhynchus keta"),],
-                   model = modI.chum,
-                   species = "Oncorhynchus keta",
-                   temp.sum = temp.sumI, 
-                   dataset = "raw")
 
 # rbind the function-returned datasets fir ech species, with predicted CIs. / used for plotting 
 dd_TempI<-rbind(Oncorhynchusgorbuscha_Tdd_full,
@@ -515,8 +448,9 @@ dd_TempI<-rbind(Oncorhynchusgorbuscha_Tdd_full,
                Oncorhynchusmykiss_Tdd_full,
                Oncorhynchusnerka_Tdd_full,
                Oncorhynchustshawytscha_Tdd_full,
-               Salmosalar_Tdd_full,
-               Oncorhynchusketa_Tdd_full)
+               Salmosalar_Tdd_full)
+               # Oncorhynchusketa_Tdd_full)
+
 dd_sizetunnel<-rbind(Oncorhynchusgorbuscha_Ldd,
                     Oncorhynchuskisutch_Ldd,
                     Oncorhynchuskisutch_Ldd,
@@ -531,27 +465,27 @@ dd_sizeField<-rbind(
       Oncorhynchusnerka_Fdd,
       Oncorhynchustshawytscha_Fdd)
 
-## Topt: find the peaks for species-specific fits (all data except field) -------
-P.chin<-function(x){coef(modI.chin)[1]  + x^1 * coef(modI.chin)[2] + x^2*coef(modI.chin)[3] }
-o.chin<- optimize(f = P.chin, interval = c(8,20), maximum = TRUE)
-
-P.chum<-function(x){coef(modI.chum)[1]  + x^1 * coef(modI.chum)[2] + x^2*coef(modI.chum)[3] }
-o.chum<- optimize(f = P.chum, interval = c(0,30), maximum = TRUE)
-
-P.coho<-function(x){coef(modI.coho)[1]  + x^1 * coef(modI.coho)[2] + x^2*coef(modI.coho)[3] }
-o.coho<- optimize(f = P.coho, interval = c(5,18), maximum = TRUE)
-
-P.salar<-function(x){coef(modI.salar)[1]  + x^1 * coef(modI.salar)[2] + x^2*coef(modI.salar)[3] }
-o.salar<- optimize(f = P.salar, interval = c(3,23), maximum = TRUE)
-
-P.trouts<-function(x){coef(modI.trouts)[1]  + x^1 * coef(modI.trouts)[2] + x^2*coef(modI.trouts)[3] }
-o.trouts<- optimize(f = P.trouts, interval = c(6,20), maximum = TRUE)
-
-P.soc<-function(x){coef(modI.soc)[1]  + x^1 * coef(modI.soc)[2] + x^2*coef(modI.soc)[3] }
-o.soc<- optimize(f = P.soc, interval = c(8,26), maximum = TRUE)
-
-P.pink<-function(x){coef(modI.pink)[1]  + x^1 * coef(modI.pink)[2] + x^2*coef(modI.pink)[3] }
-o.pink<- optimize(f = P.pink, interval = c(6,28), maximum = TRUE)
+# ## Topt: find the peaks for species-specific fits (all data except field) -------
+# P.chin<-function(x){coef(modI.chin)[1]  + x^1 * coef(modI.chin)[2] + x^2*coef(modI.chin)[3] }
+# o.chin<- optimize(f = P.chin, interval = c(8,20), maximum = TRUE)
+# 
+# P.chum<-function(x){coef(modI.chum)[1]  + x^1 * coef(modI.chum)[2] + x^2*coef(modI.chum)[3] }
+# o.chum<- optimize(f = P.chum, interval = c(0,30), maximum = TRUE)
+# 
+# P.coho<-function(x){coef(modI.coho)[1]  + x^1 * coef(modI.coho)[2] + x^2*coef(modI.coho)[3] }
+# o.coho<- optimize(f = P.coho, interval = c(5,18), maximum = TRUE)
+# 
+# P.salar<-function(x){coef(modI.salar)[1]  + x^1 * coef(modI.salar)[2] + x^2*coef(modI.salar)[3] }
+# o.salar<- optimize(f = P.salar, interval = c(3,23), maximum = TRUE)
+# 
+# P.trouts<-function(x){coef(modI.trouts)[1]  + x^1 * coef(modI.trouts)[2] + x^2*coef(modI.trouts)[3] }
+# o.trouts<- optimize(f = P.trouts, interval = c(6,20), maximum = TRUE)
+# 
+# P.soc<-function(x){coef(modI.soc)[1]  + x^1 * coef(modI.soc)[2] + x^2*coef(modI.soc)[3] }
+# o.soc<- optimize(f = P.soc, interval = c(8,26), maximum = TRUE)
+# 
+# P.pink<-function(x){coef(modI.pink)[1]  + x^1 * coef(modI.pink)[2] + x^2*coef(modI.pink)[3] }
+# o.pink<- optimize(f = P.pink, interval = c(6,28), maximum = TRUE)
 
 # create a data frame with the estimated peaks 
 fit.peaks<-data.frame(
@@ -581,7 +515,6 @@ data.cm.field.h$fit.mod.ALL2 <- predict(mod.size.field.h)
 ## Fig 7A [lab] ------
 p1.cm.Lab<-ggplot(data=dataLab, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
                                     colour=Species_latin,
-                                    shape=SWIM_cms_source,
                                     label=Reference_number_1))+
   geom_rect(data = data ,mapping = aes(xmin = 57, xmax = 62, ymin = 230, ymax = 600, fill = NULL),  fill = "white", color = "grey", linetype = "dotted", alpha = .2)+
   annotate("text", x = 63, y = 500, label = "Jump", hjust = 0, size = 5)+
@@ -612,7 +545,6 @@ p1.cm.Lab
 ## Fig 7B [field] ------
 p1.cmF<-ggplot(data=data.cm.field, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
                                       colour=Species_latin,
-                                      shape=SWIM_cms_source,
                                       label=Reference_number_1))+
   annotate(geom = "text", y = 880, x = 30, hjust = 0, color = "black", size = 3.5,
          label = bquote( "Speed = " * .(size.field.int) ~ "+" ~ .(size.field.slope) ~ "BL (n = " * .(size.field.n) * ")"))+
@@ -642,15 +574,19 @@ p1.cmF<-ggplot(data=data.cm.field, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_lat
   ylim(0,900)
 ggformat(p1.cmF, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="")
 p1.cmF<-p1.cmF+theme(legend.position = "none")
-p1.cmF
+# p1.cmF
 
 
 # Fig6. Temperature and swim ----------------------
-# Fig6B. main fih with Topt ----------
-p2.PREDFIT_full <- ggplot(data= dd_TempI, aes(y=pred.mod, x=Temp_test_mean, fill=Species_latin,
+# Fig6B. main fish with Topt ----------
+dd_TempI_Topt<-dd_TempI[!duplicated(dd_TempI$Topt),]
+dd_TempI_Topt$y <- c(10, 2, 10, 10, 10 ,10 )
+dd_TempI_Topt$x <- c(28.164158, 16.8, 14.5, 16.9,  8.282343, 22.999926)
+
+p2.PREDFIT_full <- ggplot(data = dd_TempI, aes(y=pred.mod, x=Temp_test_mean, fill=Species_latin,
                                         colour = Species_latin,
-                                        shape = SWIM_cms_source,
-                                        group = Species_latin))+
+                                        group = Species_latin,
+                                        label = round(Topt,1)))+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                      labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
                      values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
@@ -659,9 +595,11 @@ p2.PREDFIT_full <- ggplot(data= dd_TempI, aes(y=pred.mod, x=Temp_test_mean, fill
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
   # geom_ribbon(aes(ymin = pred.modCI.l,
   #                 ymax = pred.modCI.h), alpha = 0.3)+
-  geom_segment(mapping = aes(x = opt.T, y = 10, xend = opt.T, yend = opt.speed, colour = Species_latin, fill = NULL, shape = NULL), data = fit.peaks, lty="dashed", size=0.8, alpha = 0.6)+
+  geom_segment(mapping = aes(x = Topt, y = 15, xend = Topt, yend = 30, colour = Species_latin, fill = NULL, shape = NULL),
+               arrow = arrow(length = unit(0.25, "cm")), lty="solid", size=0.9, alpha = 0.6)+
   geom_line(aes(y=pred.mod, x= Temp_test_mean), size=2, lineend = "round")+ 
-  geom_text(mapping = aes(x = opt.T, y = 0, colour = Species_latin, fill = NULL, shape = NULL), angle = 90,check_overlap = TRUE, label = round(fit.peaks$opt.T,1), size=3,  fontface = "bold",  data = fit.peaks, alpha = 1)+
+  geom_text(data = dd_TempI_Topt, mapping = aes(x = x, y = y, colour = Species_latin, fill = NULL, shape = NULL),
+                  angle = 0, size= 4,  fontface = "bold", alpha = 1)+
   # geom_text(mapping = aes( x =fit.peaks[fit.peaks$Species_latin=="Oncorhynchus kisutch","opt.T"], y = 0, colour = Species_latin, fill = NULL, shape = NULL), angle = 90, label = round(fit.peaks[fit.peaks$Species_latin=="Oncorhynchus kisutch","opt.T"],1), size=2.6, label.size = 0, fontface = "bold",  data = fit.peaks[fit.peaks$Species_latin=="Oncorhynchus kisutch",], alpha = 1)+
   # geom_text(mapping = aes( x =21, y = 8), label = "Ucrit & Umax", color = "black", size=4.5)+
   # geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black", size=0.3)+  
@@ -751,7 +689,7 @@ grid2<-plot_grid(legend,
           Salmosalar_Tdd_plot,
           nrow = 4,
           ncol = 1,
-          labels = c( "", "c", "e","g"),
+          labels = c( "", "b", "d","f"),
           label_x = c(0.2, 0.2, 0.2, 0.2),
           label_y = c(0.96, 0.96, 0.96, 0.96),
           align = "hvr")
@@ -763,7 +701,7 @@ grid3<-plot_grid(Oncorhynchusnerka_Tdd_plot,
           label_y = c(0.96, 0.96, 0.96, 0.96),
           nrow = 4,
           ncol = 1,
-          labels = c("b", "d", "f", "h"),
+          labels = c("a", "c", "e", "g"),
           align = "v")
 
 grid1<-cowplot::plot_grid(p2.size_hist,
@@ -794,7 +732,6 @@ cowplot::plot_grid(p1.cm.Lab, p1.cmF,
 ## [ Not used ] Tunnel tests, swim size ------
 p1.cm<-ggplot(data=data.cm.tunnel, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
                                        colour=Species_latin,
-                                       shape=SWIM_cms_source,
                                        label=Reference_number_1))+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                      labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
