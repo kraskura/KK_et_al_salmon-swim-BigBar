@@ -6,33 +6,62 @@ get.adult.salmonid.swim.data <- function(data.file){
   # Import data: --------
   data<-read.csv(data.file)
   # rename column names: 
-  names(data) <- c("Reference_number_1", "Species_latin", "Key_origin", "Year_published",
-                   "N_morphometrics", "Size_MIN_kg", "Size_MAX_kg", "Size_MEAN_kg",
-                   "Size_error_kg", "UNIT_Size_error_kg", "Length_MIN_cm", "Length_MAX_cm",
-                   "Length_MEAN_cm", "Length_error", "UNIT_length_error", "Length_UNIT",
-                   "Sex_F_M", "Temp_test_mean", "SW_FW", "Test_performance",
-                   "Indiv_group","FishID", "swim_speed_MIN_BL_s", "swim_speed_MAX_BL_s", "swim_speed_MEAN_BL_s", 
-                   "swim_speed_error_BL_s", "UNIT_swim_error_BLs","Duration_swim",
-                   "swim_speed_MIN_cm_s", "swim_speed_MAX_cm_s", "swim_speed_MEAN_cm_s", "swim_speed_error_cm_s", "UNIT_swim_error_cm_s",
-                   "Water_flows_cm_s", "Water_flows_m_3_s", "Swim_Conditions", "Fish_Conditions",
+  names(data) <- c("Reference_number_1",
+                   "Species_latin",
+                   "Key_origin",
+                   "Year_published",
+                   "N_morphometrics",
+                   "Size_MIN_kg",
+                   "Size_MAX_kg",
+                   "Size_MEAN_kg",
+                   "Size_error_kg",
+                   "UNIT_Size_error_kg",
+                   "Length_MIN_cm",
+                   "Length_MAX_cm",
+                   "Length_MEAN_cm",
+                   "Length_error",
+                   "UNIT_length_error",
+                   "Length_UNIT",
+                   "Sex_F_M",
+                   "Temp_test_mean",
+                   "SW_FW",
+                   "Test_performance",
+                   "Indiv_group",
+                   "FishID",
+                   "N_swim_speed",
+                   "swim_speed_MIN_BL_s",
+                   "swim_speed_MAX_BL_s", 
+                   "swim_speed_MEAN_BL_s", 
+                   "swim_speed_error_BL_s",
+                   "UNIT_swim_error_BLs",
+                   "Duration_swim",
+                   "swim_speed_MIN_cm_s",
+                   "swim_speed_MAX_cm_s",
+                   "swim_speed_MEAN_cm_s",
+                   "swim_speed_error_cm_s",
+                   "UNIT_swim_error_cm_s",
+                   "Water_flows_cm_s",
+                   "Water_flows_m_3_s", "Swim_Conditions", "Fish_Conditions",
                    "GSI_MEAN", "Gonad_g", "Blood", "Mortality",
-                   "Surgery", "Recovery", "Tracking", "Data_source", "Reference_2", "N_swim_speed")
+                   "Surgery", "Recovery", "Tracking", "Data_source", "Reference_2", "SwimNorFishID", "population")
   
-  # standardize all na's, empty cells, 
-  data <- data %>% 
-    mutate_all(na_if,"") %>% 
-    mutate_all(na_if,"na") 
   
-  data$Blood[data$Blood=="n"]<-0
-  data$Blood[data$Blood=="y"]<-1
-  data$Tracking[data$Tracking=="n"]<-0
-  data$Tracking[data$Tracking=="y"]<-1
-  data$Mortality[data$Mortality=="n"]<-0
-  data$Mortality[data$Mortality=="y"]<-1
-  data$Recovery[data$Recovery=="n"]<-0
-  data$Surgery[data$Surgery=="n"]<-0
-
-    # combine mean and max speeds
+  # # standardize all na's, empty cells, 
+  # data <- data %>% 
+  #   mutate(across(everything(), as.character)) %>%   # make all columns characters for cleaning purposes
+  #   mutate_all(na_if,"") %>% 
+  #   mutate_all(na_if,"na") 
+  
+  # data$Blood[data$Blood=="n"]<-0
+  # data$Blood[data$Blood=="y"]<-1
+  # data$Tracking[data$Tracking=="n"]<-0
+  # data$Tracking[data$Tracking=="y"]<-1
+  # data$Mortality[data$Mortality=="n"]<-0
+  # data$Mortality[data$Mortality=="y"]<-1
+  # data$Recovery[data$Recovery=="n"]<-0
+  # data$Surgery[data$Surgery=="n"]<-0
+  
+  # combine mean and max speeds
   for (i in 1:nrow(data)){
     if(!is.na(data$swim_speed_MAX_BL_s[i])){
       message(paste("Swim speed changed from: MEAN - ", data$swim_speed_MEAN_BL_s[i], " to MAX - ", data$swim_speed_MAX_BL_s[i], sep = "" ))
@@ -54,14 +83,8 @@ get.adult.salmonid.swim.data <- function(data.file){
   data$UNIT_swim_error_cm_s<-plyr::revalue(data$UNIT_swim_error_cm_s, c("se"="SE", "sd"="SD"))
   
   # print(data$Species_latin[which(nchar(data$Species_latin) == max(nchar(data$Species_latin)))])
-  # data[c(887,888),]  # these are two combined Salmonid species O nerka and O kisutch
   data$Species_latin<-as.character(data$Species_latin)
-  data[which(data$Species_latin=="Oncorhynchus gorbuscha "),"Species_latin"]<-"Oncorhynchus gorbuscha"
-  data[which(data$Species_latin=="Onchorynchus tshawytscha"),"Species_latin"]<-"Oncorhynchus tshawytscha"
-  data[which(data$Species_latin=="Oncorhynchus gardneri"),"Species_latin"]<-"Oncorhynchus mykiss"
-  data[c(which(nchar(data$Species_latin) == max(nchar(data$Species_latin)))),"Species_latin"]<-"Oncorhynchus spp."
-  data$Species_latin<-as.factor(as.character(data$Species_latin))
-  
+
   # group two density measures in just density
   data$Fish_Conditions<-as.character(data$Fish_Conditions)
   data[which(data$Fish_Conditions=="high density, exercise trained"),"Fish_Conditions"]<-"density exercise trained"
@@ -69,35 +92,56 @@ get.adult.salmonid.swim.data <- function(data.file){
   data[which(data$Fish_Conditions=="high density"),"Fish_Conditions"]<-"density"
   data[which(data$Fish_Conditions=="low density"),"Fish_Conditions"]<-"density"
   
-  data$Fish_Conditions<-as.factor(as.character(data$Fish_Conditions))
+  # factor and numeric variables 
+  fact.variables<-c("Reference_number_1", "Species_latin", "Key_origin", "Year_published",
+          "UNIT_Size_error_kg", "UNIT_length_error", "Length_UNIT",
+          "Sex_F_M", "SW_FW", "Test_performance", "Indiv_group","FishID",
+          "UNIT_swim_error_BLs","UNIT_swim_error_cm_s", "Swim_Conditions", "Fish_Conditions",
+          "Blood", "Mortality", "Surgery", "Recovery", "Tracking", "Data_source", "Reference_2", "population")
   
+  num.variables<-c("N_morphometrics", "Size_MIN_kg", "Size_MAX_kg", "Size_MEAN_kg", "Size_error_kg",
+          "Length_MEAN_cm", "Length_error","Length_MIN_cm", "Length_MAX_cm","Temp_test_mean",
+          "swim_speed_MIN_BL_s", "swim_speed_MAX_BL_s", "swim_speed_MEAN_BL_s", "swim_speed_error_BL_s",
+          "Duration_swim", "swim_speed_MIN_cm_s", "swim_speed_MAX_cm_s", "swim_speed_MEAN_cm_s",
+          "swim_speed_error_cm_s", "Water_flows_cm_s", "Water_flows_m_3_s","GSI_MEAN", "Gonad_g", "N_swim_speed")
+  
+  data[, fact.variables] <- sapply(data[, fact.variables], as.factor)
+  data[, num.variables] <- sapply(data[, num.variables], as.numeric)
+
   # make all differnet jumps together in one column
   # make all ucrits (repeat test as well as EMG Ucrits under one - Ucrit)
 
   # grouping Test performance in broader categories
   data$Test_performance2<-NA
-  
+  data$Test_performance3<-NA
+
   for (i in 1:nrow(data)){
-    # if (grepl("Jump", as.character(data$Test_performance[i]), perl = TRUE) & data$Reference_number_1 == "58"){
-    #   data$Test_performance2[i]<-"Field"
-    # }
-    # if (grepl("Jump", as.character(data$Test_performance[i]), perl = TRUE) & data$Reference_number_1 == "40"){
+    if (grepl("Jump", as.character(data$Test_performance[i]), perl = TRUE) & data$Reference_number_1[i] == "58"){
+      data$Test_performance2[i]<-"Jump"
+      data$Test_performance3[i]<-"FIELD"
+    }
+    if (grepl("Jump", as.character(data$Test_performance[i]), perl = TRUE) & data$Reference_number_1[i] == "40"){
+      data$Test_performance2[i]<-"Jump"
+      data$Test_performance3[i]<-"LAB"
+    }
+    # if (grepl("Jump", as.character(data$Test_performance[i]), perl = TRUE)){
     #   data$Test_performance2[i]<-"Jump"
     # }
-    if (grepl("Jump", as.character(data$Test_performance[i]), perl = TRUE)){
-      data$Test_performance2[i]<-"Jump"
-    }
     if (grepl("Ucrit", as.character(data$Test_performance[i]), perl = TRUE)){
       data$Test_performance2[i]<-"Ucrit"
+      data$Test_performance3[i]<-"LAB"
     }
     if (grepl("Swim", as.character(data$Test_performance[i]), perl = TRUE)){
       data$Test_performance2[i]<-"Swim"
+      data$Test_performance3[i]<-"LAB"
     }
     if (grepl("Umax", as.character(data$Test_performance[i]), perl = TRUE)){
       data$Test_performance2[i]<-"Umax"
+      data$Test_performance3[i]<-"LAB"
     }
     if (grepl("Field", as.character(data$Test_performance[i]), perl = TRUE)){
       data$Test_performance2[i]<-"Field"
+      data$Test_performance3[i]<-"FIELD"
     }
     if (grepl("Acceleration", as.character(data$Test_performance[i]), perl = TRUE)){
       data$Test_performance2[i]<-"Acceleration"
@@ -105,9 +149,15 @@ get.adult.salmonid.swim.data <- function(data.file){
     }
     if (grepl("TTF", as.character(data$Test_performance[i]), perl = TRUE)){
       data$Test_performance2[i]<-"TTF"
+      data$Test_performance3[i]<-"LAB"
+    }
+    if (grepl("fishway", as.character(data$Test_performance[i]), perl = TRUE)){
+      data$Test_performance2[i]<-"Fishway"
+      data$Test_performance3[i]<-"FIELD"
     }
     if (is.na(data$Test_performance2[i])){
       data$Test_performance2[i]<-"other"
+      print(data$Test_performance[i])
       message("Category \"other\" performance noted")
     }
   }
@@ -488,8 +538,8 @@ get.adult.salmonid.swim.data <- function(data.file){
   
   # view(data[which(is.na(data$SWIM_cms_source)),])
        
-  Fieldswim<-data[c(data$Test_performance=="Field" | data$Reference_number_1 == "58"), ]
-  Labswim<-data[!c(data$Test_performance=="Field" | data$Reference_number_1 == "58"), ]
+  Fieldswim<-data[data$Test_performance3 == "FIELD", ]
+  Labswim<-data[data$Test_performance3 == "LAB", ]
   nrow(Fieldswim) + nrow(Labswim) == nrow(data)
   message(
     paste("Swim speeds from field: total(",  nrow(Fieldswim),"),  N indiv(", length(unique(Fieldswim$FishID)), "),  N studies(", length(unique(Fieldswim$Reference_number)), ")", sep="")

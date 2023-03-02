@@ -2,13 +2,13 @@
 # 
 # 
 # lab data, sufficiently robust with temp and size -----
-species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = NULL){
+species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.subsetID, ylim_low = 0, ylim_high = 250, scale.fish.size = NULL){
   
     if(dataform == "normalized"){
       
       message("Size not included in the linear model")
       
-      dd<-data.cmTNorm.use[(data.cmTNorm.use$Species_latin == species),]
+      dd<-data.subset[(data.subset$Species_latin == species),]
       model<-lm(SWIM_cms.prop0 ~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dd)
       
       data.pred.CI<-predict(model, interval = "confidence") 
@@ -42,21 +42,28 @@ species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = 
       assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd",sep=""),dd, envir = .GlobalEnv)
       message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd",sep=""))
       
-      ggsave(filename = paste("../../ms_exports/Figures/Species_temp_plots/normalized/Sp_", species,".png", sep=""),
+      ggsave(filename = paste("./ms_exports/Figures/Species_temp_plots/normalized/Sp_", species,".png", sep=""),
              plot = plot.sp.t, width = 3, height = 3)
       
     }
    
     if(dataform == "raw" & is.null(scale.fish.size)){
       
-      dd<-dataLab.use[(dataLab.use$Species_latin == species),]
-      model<-lm(SWIM_cms ~ poly(Temp_test_mean,2, raw = T) + LENGTH_cm, na.action=na.exclude, data = dd)
+      dd<-data.subset[(data.subset$Species_latin == species),]
+      # print(summary(dd))
       
-      dd_pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(dd$Temp_test_mean), max(dd$Temp_test_mean), 0.5), 
+      if(data.subsetID == "Lab" | data.subsetID == "Tunnel"){
+        model<-lm(SWIM_cms ~ poly(Temp_test_mean,2, raw = T) + LENGTH_cm, na.action=na.exclude, data = dd)
+      }else{
+        model<-lm(SWIM_cms ~ Temp_test_mean + LENGTH_cm, na.action=na.exclude, data = dd)
+      }
+      
+      dd_pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(dd$Temp_test_mean, na.rm =T), max(dd$Temp_test_mean, na.rm =T), 0.5), 
                                          LENGTH_cm = mean(dd$LENGTH_cm, na.rm =T), Species_latin = species))
       
       dd_pred.size<-as.data.frame(expand.grid(Temp_test_mean = mean(dd$Temp_test_mean, na.rm =T), 
-                                         LENGTH_cm = seq(min(dd$LENGTH_cm, na.rm =T), max(dd$LENGTH_cm), 1), Species_latin = species))
+                                         LENGTH_cm = seq(min(dd$LENGTH_cm, na.rm =T), max(dd$LENGTH_cm, na.rm =T), 1),
+                                         Species_latin = species))
       
       data.pred.CI<-predict(model, newdata = dd_pred, interval = "confidence") 
       dd_pred$pred.mod<-data.pred.CI[,1]
@@ -72,12 +79,18 @@ species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = 
       n<-temp.sum[temp.sum$Species_latin == species,"n"]
       label.plot<-paste("n = ", n, " (", n.stud,")", sep="")
       
-      # optimal temps 
-      P.species<-function(x){coef(model)[1] + x^1 * coef(model)[2] + x^2*coef(model)[3]}
-      o.species<- optimize(f = P.species,
-                           interval = c(min(dd$Temp_test_mean), max(dd$Temp_test_mean)),
+      # optimal temps for lab data
+      if(data.subsetID == "Lab" | data.subsetID == "Tunnel"){
+        P.species<-function(x){coef(model)[1] + x^1 * coef(model)[2] + x^2*coef(model)[3]}
+        o.species<- optimize(f = P.species,
+                           interval = c(min(dd$Temp_test_mean, na.rm =T), max(dd$Temp_test_mean, na.rm =T)),
                            maximum = TRUE)
-      # 
+      }else{
+        o.species<-NA
+        P.species<-NA
+      }
+      
+       
       # # print(outer(x = c(min(dd$Temp_test_mean), max(dd$Temp_test_mean)),
       # #             y = mean(dd$LENGTH_cm), FUN=P.species))
       
@@ -93,12 +106,13 @@ species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = 
                           values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
         geom_point(size = 2, alpha=1)+
         # facet_wrap(.~Species_latin)+
-        geom_text(inherit.aes = FALSE, mapping = aes( x = 12, y = 15), label = label.plot, color = "black", size=4.5)+
+        geom_text(inherit.aes = FALSE, mapping = aes( x = 25, y = ylim_high-10), label = label.plot,
+                  hjust = 1,color = "black", size=4.5)+
         scale_shape_manual(values = c(21,23))+
         geom_ribbon(data=dd_pred, aes(y = NULL, ymin = pred.modCI.l,
                         ymax = pred.modCI.h,  fill=Species_latin, colour=Species_latin, group = Species_latin ), alpha = 0.3)+
         geom_line(data=dd_pred, aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
-        ylim(0, 250)+
+        ylim(ylim_low, ylim_high)+
         scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
       ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 10)
       plot.sp.t<-plot.sp.t + theme(legend.position = "none", 
@@ -111,15 +125,7 @@ species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = 
         plot.sp.t <- plot.sp.t + theme(axis.title.y = element_blank())
       }
       # p2.cmNorm0
-      
-      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_full",sep=""),dd_pred, envir = .GlobalEnv)
-      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_full",sep=""))
-      
-      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_plot",sep=""),plot.sp.t, envir = .GlobalEnv)
-      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_plot",sep=""))
-
-      ggsave(filename = paste("../../ms_exports/Figures/Species_temp_plots/rawdata/Fig6_rawdata_tpcs", species,".png", sep=""),
-             plot = plot.sp.t, width = 3, height = 3)
+    
       
       # size plots 
       plot.sp.s<-ggplot(data=dd, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin, colour=Species_latin, group = Species_latin))+
@@ -134,21 +140,32 @@ species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = 
       geom_ribbon(data = dd_pred.size, aes( y = NULL, ymin = pred.modCI.l, ymax = pred.modCI.h), alpha = 0.3)+
       geom_line(data = dd_pred.size, aes(y=pred.mod, x=LENGTH_cm), color = "black")+
       scale_x_continuous(limits = c(30, 100), breaks = c(30, 40, 50, 60, 70, 80, 90))+
-      ylim(0, 250)+
-      geom_text(mapping = aes( x = 45, y = 240), label = "Lab", color = "black", size=4.5)
+      ylim(ylim_low, ylim_high)+
+      geom_text(mapping = aes( x = 45, y = ylim_high-10), label = data.subsetID, color = "black", size=4.5)
       ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 12)
       plot.sp.s<-plot.sp.s+theme(legend.position = "none")
       
-      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Ldd",sep=""),dd_pred.size, envir = .GlobalEnv)
-      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Ldd",sep=""))
-      ggsave(filename = paste("../../ms_exports/Figures/Species_size_plots/Sp_", species,"-lab",".png", sep=""), plot = plot.sp.s, width = 3, height = 3)
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_dataTemp_", data.subsetID, sep=""), dd_pred, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_dataTemp", data.subsetID, sep=""))
+
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_dataSize", data.subsetID, sep=""), dd_pred.size, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_dataSize", data.subsetID, sep=""))
+      
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_plotTemp", data.subsetID, sep=""), plot.sp.t, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_plotTemp", data.subsetID, sep=""))
+      
+      ggsave(filename = paste("./ms_exports/Figures/Species_temp_plots/Fig6_rawdata_TPCs", data.subsetID,"_", species,".png", sep=""),
+             plot = plot.sp.t, width = 3, height = 3)
+
+      ggsave(filename = paste("./ms_exports/Figures/Species_size_plots/Sp_", data.subsetID, "_" , species,".png", sep=""),
+             plot = plot.sp.s, width = 3, height = 3)
     
     }
     
     if(dataform == "raw" & !is.null(scale.fish.size)){
       
       message("Size not included in the linear model")
-      dd<-dataLab.use[(dataLab.use$Species_latin == species),]
+      dd<-data.subset[(data.subset$Species_latin == species),]
       model<-lm(SWIM_cms_scaled ~ poly(Temp_test_mean,2, raw = T), na.action=na.exclude, data = dd)
       
       data.pred.CI<-predict(model, interval = "confidence") 
@@ -187,14 +204,16 @@ species.temp.size.fits<-function(species, temp.sum, dataform, scale.fish.size = 
       }
       # p2.cmNorm0
       
-      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_full",sep=""),dd, envir = .GlobalEnv)
-      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_full",sep=""))
-      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_plot",sep=""),plot.sp.t, envir = .GlobalEnv)
-      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_Tdd_plot",sep=""))
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_scaled_dd_full",sep=""),dd, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_scaled_Tdd_full",sep=""))
+      assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_scaled_Tdd_plot",sep=""),plot.sp.t, envir = .GlobalEnv)
+      message(paste(gsub(x=species,pattern = " ",replacement = ""),"_scaled_Tdd_plot",sep=""))
 
-      ggsave(filename = paste("../../ms_exports/Figures/Species_temp_plots/size_scaled/Fig6_rawdata_size_scaled_tpcs", species,".png", sep=""),
+      ggsave(filename = paste("./ms_exports/Figures/Species_temp_plots/size_scaled/Fig6_rawdata_size_scaled_tpcs", species,".png", sep=""),
              plot = plot.sp.t, width = 3, height = 3)
     }
+  
+    
     
 }
 
