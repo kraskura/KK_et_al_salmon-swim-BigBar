@@ -513,13 +513,12 @@ ggsave(filename = "./ms_exports/Figures/FigS3_rel_temp_speed.png",
        width = 5.5, height = 9,units = "in")
 
 
-## Supplemental Fig6 Time to fatigue -----------
+## MAIN manuscript Fig 9: Time to fatigue -----------
 
-ttf.p<-ggplot(data = data.ttf[data.ttf$Duration_swim<100,], aes(y=SWIM_cms, x=Duration_swim, size = LENGTH_cm, color = Species_latin, fill = Species_latin))+
-  geom_point(pch=1, alpha=1)+
-  # geom_point(data =  data.ttf[data.ttf$Duration_swim<100,], 
-  #            mapping = aes(y=SWIM_cms, x=Duration_swim, color = Species_latin, size = LENGTH_cm),
-  #            pch=1, alpha=1)+
+ttf.p<-ggplot(data = data.ttf[data.ttf$Duration_swim>200/60,], aes(y=SWIM_cms, x=Duration_swim, size = LENGTH_cm, color = Species_latin, fill = Species_latin))+
+  geom_point(pch=1, alpha=1, stroke = 1)+
+  scale_y_continuous(breaks = c(0,50, 100, 150, 200, 250, 300, 350), limits = c(0, 350), name = "Swim speed (cm/s)")+
+  scale_x_continuous(breaks = c(3,50, 150,250,  350), limits = c(0, 350))+
   guides(size = F)+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                      labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
@@ -531,12 +530,53 @@ ttf.p<-ggplot(data = data.ttf[data.ttf$Duration_swim<100,], aes(y=SWIM_cms, x=Du
 ggformat(ttf.p, print=TRUE, y_title = "Swim speed (cm/s)", x_title = "Swim duration (h)")
 ttf.p <- ttf.p + theme(legend.text = element_text(face = "italic"), 
                    legend.title = element_blank(), 
-                   legend.position = c(0.85, 0.75))
+                   legend.position = "none")
 
-ttf.p.1H<-ggplot(data = data.ttf[data.ttf$Duration_swim<=1, ], aes(y=SWIM_cms, x=Duration_swim*60, color = Species_latin, fill = Species_latin))+
+ttf.p.prol<-ggplot(data = data.ttf[data.ttf$Duration_swim>20/60/60 & data.ttf$Duration_swim<200/60,], aes(y=SWIM_cms, x=Duration_swim*60, size = LENGTH_cm, color = Species_latin, fill = Species_latin))+
+  geom_point(pch=1, alpha=1, stroke = 1)+
+  scale_y_continuous(breaks = c(0,50, 100, 150, 200, 250, 300, 350), limits = c(0, 350), name = "Swim speed (cm/s)")+
+  guides(size = F)+
+  geom_vline(xintercept = 10, linetype= "dashed", color = "black")+
+  scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  labs(size="Size (FL, cm)", color="Species", fill="Species")
+ggformat(ttf.p.prol, print=TRUE, y_title = "Swim speed (cm/s)", x_title = "Swim duration (min)")
+ttf.p.prol <- ttf.p.prol + theme(legend.text = element_text(face = "italic"), 
+                                      legend.position = "none",
+                                 legend.title = element_blank())
+
+
+ttf.p.prol.inset<-ggplot(data = data.ttf[data.ttf$Duration_swim>20/60/60 & data.ttf$Duration_swim<10/60,], 
+                         aes(y=SWIM_cms, x=Duration_swim*60, size = LENGTH_cm, color = Species_latin, fill = Species_latin))+
+  geom_point(pch=1, alpha=1, stroke = 1)+
+  scale_y_continuous(breaks = c(0,50, 100, 150, 200, 250, 300, 350), limits = c(0, 350), name = "Swim speed (cm/s)")+
+  # scale_size_manual(values = c(0.5, 1))+
+  guides(size = F)+
+  scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
+                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  labs(size="Size (FL, cm)", color="Species", fill="Species")
+ggformat(ttf.p.prol.inset, print=TRUE, y_title = "Swim speed (cm/s)", x_title = "Swim duration (min)")
+ttf.p.prol.inset <- ttf.p.prol.inset + theme(legend.text = element_text(face = "italic"),
+                                            legend.position = "none",
+                                            legend.title = element_blank())
+
+# legend.ttf<- cowplot::get_legend(ttf.p.pro.inset )
+
+# ttf.p.pro.inset
+
+ttf.p.1H<-ggplot(data = data.ttf[data.ttf$Duration_swim<=20/60/60, ], aes(y=SWIM_cms, x=Duration_swim*60*60, color = Species_latin, fill = Species_latin))+
   # geom_point(pch=21, alpha=1,  show.legend = F)+
-  geom_point(mapping = aes(y=SWIM_cms, x=Duration_swim*60, color = Species_latin, size = LENGTH_cm),
-             pch=1, alpha=1)+
+  geom_point(mapping = aes(y=SWIM_cms, x=Duration_swim*60*60, color = Species_latin, size = LENGTH_cm),
+             pch=1, alpha=1, stroke = 1)+
+  scale_y_continuous(breaks = c(0,50, 100, 150, 200, 250, 300, 350), limits = c(0, 350), name = "Swim speed (cm/s)")+
   guides(size = F, color = F, fill = F)+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                      labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
@@ -545,17 +585,22 @@ ttf.p.1H<-ggplot(data = data.ttf[data.ttf$Duration_swim<=1, ], aes(y=SWIM_cms, x
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
   labs(size="Size (FL, cm)", color="Species", fill="Species")
-ggformat(ttf.p.1H, print=TRUE, y_title = "Swim speed (cm/s)", x_title = "Swim duration (min)")
+ggformat(ttf.p.1H, print=TRUE, y_title = "Swim speed (cm/s)", x_title = "Swim duration (seconds)")
+ttf.p.1H <- ttf.p.1H + theme(legend.text = element_text(face = "italic"), 
+                   legend.title = element_blank(), 
+                   legend.position = c(0.85, 0.75))
 
 
-
-cowplot::plot_grid(ttf.p, ttf.p.1H,
-                    nrow = 2, ncol=1, 
+cowplot::plot_grid(ttf.p.1H, ttf.p.prol, ttf.p, ttf.p.prol.inset,
+                    nrow = 2, ncol=2, 
                     labels = "AUTO",
-                    label_x = c(0.9),
-                    label_y = c(0.9, 0.9)) %>% 
+                    # label_size = 17,
+                    label_x = c(0.2, 0.2),
+                    label_y = c(0.89, 0.91)) %>% 
 ggsave(filename = "./ms_exports/Figures/FigMain_ttf.png",
-         width = 6, height = 9,units = "in")
+         width = 8, height = 8,units = "in")
+
+ggsave(filename = "./ms_exports/Figures/FigureMain_ttf_legend.png", legend.ttf)
 
 ## Supplemental Fig 6: [cms] Sex -------------------
 swim_sex.cm<-ggplot(data = dataLab,

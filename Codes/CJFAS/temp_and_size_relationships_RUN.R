@@ -13,10 +13,12 @@ library(merTools) # for CI of lmer models
 library(dplyr)
 library(lattice)
 library(here)
-library(ggformat2)
+library(ggformat2)  # ggplot formatting from github 
 
 source("./Codes/get_dataset.R")
 source("./Codes/CJFAS/temp_and_size_species_mod_fnxns.R")
+source("./Codes/table_BIC.R")
+
 
 # 1. Import and organize data sets --------
 data.all<-get.adult.salmonid.swim.data(
@@ -502,7 +504,8 @@ p1.cmF<-ggplot(data=data.cm.field, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_lat
   geom_line(data = pred.size, mapping =aes(y=fit.mod.field.l, x=LENGTH_cm, label=NULL, shape = NULL), color = "black", size=0.6, linetype = "dashed")+
   geom_hline(yintercept = 250, color = "grey", size=0.3, lty=2)+
   xlim(15, 100)+
-  ylim(0,900)
+  scale_y_continuous(limits = c(0,900), breaks = c(100, 200, 300, 400, 500, 600, 700, 800, 900))
+
 ggformat(p1.cmF, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="")
 p1.cmF<-p1.cmF+theme(legend.position = "none")
 p1.cmF

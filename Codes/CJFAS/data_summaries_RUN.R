@@ -168,46 +168,8 @@ summary(factor(data[(data$Species_latin == "Oncorhynchus nerka"),"population"]))
 
 # 3. data estimate summaries  ----------
 # ****************************************************
-## 3.1. by species BL/s, cm/s-----
-# datapoints SWIM cm/.s estimated, or reported, usen in all figs etc
-data_sum5_ALL<-as.data.frame(data[!is.na(data$SWIM_cms),] %>% 
-                           group_by(Species_latin) %>% 
-                           dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                             studies = paste(unique(Reference_number_1), collapse = ', ')))
-#datapoints cm/s reported by author
-data_sum5<-as.data.frame(data %>%
-                           filter(!is.na(swim_speed_MEAN_cm_s)) %>% 
-                           group_by(Species_latin) %>% 
-                           dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                             studies = paste(unique(Reference_number_1), collapse = ', ')))
 
-#datapoints BL reported by author 
-data_sum5dpBL<-as.data.frame(data %>%
-                            filter(!is.na(swim_speed_MEAN_BL_s)) %>%  
-                            group_by(Species_latin) %>% 
-                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                              studies = paste(unique(Reference_number_1), collapse = ', ')))
-
-data_sum5bothswim<-as.data.frame(data[c(!is.na(data$swim_speed_MEAN_BL_s) & !is.na(data$swim_speed_MEAN_cm_s)),] %>% 
-                                   group_by(Species_latin) %>% 
-                                   dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                                     studies = paste(unique(Reference_number_1), collapse = ', ')))
-
-
-data_sum5_ALL$swim_units<-"CM_S_ALL"
-data_sum5$swim_units<-"cm.s"
-data_sum5dpBL$swim_units<-"BL.s"
-data_sum5bothswim$swim_units<-"BL.s_cm.s"
-refs_n<-rbind(data_sum5_ALL, data_sum5, data_sum5dpBL, data_sum5bothswim)
-
-# merged_dsum5<-merge(merge(data_sum5dpBL,data_sum5,  by = "Species_latin", all.x = T),data_sum5bothswim,  by = "Species_latin", all.x = T)
-# save for MS
-write.csv(file="./ms_exports/Tables/SUPL_table1_summary.csv", refs_n, row.names=FALSE)
-
-
-
-
-## 3.2. recovery studies, data points ---------
+## 3.1. Recovery: in-text summary stats ---------
 data_sum6<-as.data.frame(data[c(!is.na(data$SWIM_cms) & !data$Recovery=="0"),] %>% 
                            group_by(Test_performance2, Recovery) %>% 
                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
@@ -224,17 +186,17 @@ data_sum6<-as.data.frame(data  %>%
                                                  studies = paste(unique(Reference_number_1), collapse = ', ')))
 
 # ***********************************************************
-## 3.3. max speed table species ---- 
+## 3.2. Species: in-text & figure panels summary stats  ---- 
 swim_max<-data %>% 
   group_by(Species_latin) %>% 
   dplyr:::summarise(mean_max= max(SWIM_cms, na.rm=TRUE), n = sum(!is.na(SWIM_cms)))
 
 swim_maxBL<-data %>% 
   group_by(Species_latin) %>% 
-  dplyr:::summarise(mean_max= max(swim_speed_MEAN_BL_s, na.rm=TRUE), n =sum(!is.na(swim_maxBL)))
+  dplyr:::summarise(mean_max= max(swim_speed_MEAN_BL_s, na.rm=TRUE), n =sum(!is.na(swim_speed_MEAN_BL_s)))
 
 
-### by species using MIN and MAX to get the full range 
+# by species using MIN and MAX to get the full range 
 # by species - USING MEANS ONLY
 
 data_sum_species_MINMAX<-data %>%
@@ -271,12 +233,50 @@ data_sum_species_Fig6 <- data %>%
                     count_Lenght = sum(!is.na(LENGTH_cm))) %>% 
   as.data.frame()
 
+## TABLE A3 -----
+# datapoints SWIM cm/.s estimated, or reported, usen in all figs etc
+data_sum5_ALL<-as.data.frame(data[!is.na(data$SWIM_cms),] %>% 
+                           group_by(Species_latin) %>% 
+                           dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
+                                             studies = paste(unique(Reference_number_1), collapse = ', '))) 
+#datapoints cm/s reported by author
+data_sum5<-as.data.frame(data %>%
+                           filter(!is.na(swim_speed_MEAN_cm_s)) %>%
+                           group_by(Species_latin) %>%
+                           dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
+                                             studies = paste(unique(Reference_number_1), collapse = ', '))) 
+
+#datapoints BL reported by author 
+data_sum5dpBL<-as.data.frame(data %>%
+                            filter(!is.na(swim_speed_MEAN_BL_s)) %>%  
+                            group_by(Species_latin) %>% 
+                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
+                                              studies = paste(unique(Reference_number_1), collapse = ', '))) 
+
+data_sum5bothswim<-as.data.frame(data[c(!is.na(data$swim_speed_MEAN_BL_s) & !is.na(data$swim_speed_MEAN_cm_s)),] %>% 
+                                   group_by(Species_latin) %>% 
+                                   dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
+                                                     studies = paste(unique(Reference_number_1), collapse = ', ')))
 
 
-## 3.4. main MS Table 1 -------------------
-# by species - USING MEANS ONLY
+data_sum5_ALL$swim_units<-"CM_S_ALL"
+data_sum5$swim_units<-"cm.s.reported"
+data_sum5dpBL$swim_units<-"BL.s"
+data_sum5bothswim$swim_units<-"BL.s_AND_cm.s"
+refs_n<-rbind(data_sum5_ALL, data_sum5, data_sum5dpBL, data_sum5bothswim)
+
+# merged_dsum5<-merge(merge(data_sum5dpBL,data_sum5,  by = "Species_latin", all.x = T),data_sum5bothswim,  by = "Species_latin", all.x = T)
+# save for MS
+write.csv(file="./ms_exports/Tables/Table_A3.csv", refs_n, row.names=FALSE)
+
+
+
+
+
+## TABLE 1: cm/s by species, by field/fishway/ucri/umax-------------------
+
 data_sum_species_test.cm<-data.cm %>% 
-  group_by(Species_latin, Test_performance3) %>% 
+  group_by(Species_latin, Test_performance2) %>% 
   dplyr:::summarize(min_swim_speedCM = min(SWIM_cms, na.rm = TRUE),
                     max_swim_speedCM = max(SWIM_cms, na.rm = TRUE), 
                     mean_swim_speedCM = mean(SWIM_cms, na.rm = TRUE), 
@@ -290,10 +290,13 @@ data_sum_species_test.cm<-data.cm %>%
                     min_Temp = min(Temp_test_mean, na.rm = TRUE),
                     max_Temp = max(Temp_test_mean, na.rm = TRUE), 
                     mean_Temp = mean(Temp_test_mean, na.rm = TRUE)) %>% 
-  as.data.frame()
+  as.data.frame() %>% 
+  write.csv(file="./ms_exports/Tables/Table_1.csv", row.names=FALSE)
 
+
+## TABLE S4: BL/s by species, by field/fishway/ucri/umax-------------------
 data_sum_species_test.BL<-data.BL %>% 
-  group_by(Species_latin, Test_performance3) %>% 
+  group_by(Species_latin, Test_performance2) %>% 
   dplyr:::summarize(min_swim_speedBL = min(swim_speed_MEAN_BL_s, na.rm = TRUE),
                     max_swim_speedBL = max(swim_speed_MEAN_BL_s, na.rm = TRUE), 
                     mean_swim_speedBL = mean(swim_speed_MEAN_BL_s, na.rm = TRUE),
@@ -306,8 +309,9 @@ data_sum_species_test.BL<-data.BL %>%
                     mean_Sizekg = mean(Size_MEAN_kg, na.rm = TRUE), 
                     min_Temp = min(Temp_test_mean, na.rm = TRUE),
                     max_Temp = max(Temp_test_mean, na.rm = TRUE), 
-                    mean_Temp = mean(Temp_test_mean, na.rm = TRUE))
-
+                    mean_Temp = mean(Temp_test_mean, na.rm = TRUE)) %>% 
+  as.data.frame() %>% 
+  write.csv(file="./ms_exports/Tables/Table_S4.csv", row.names=FALSE)
 
 # data_sum_species<-data %>% 
 #   group_by(Species_latin) %>% 
@@ -325,94 +329,38 @@ data_sum_species_test.BL<-data.BL %>%
 
 # as.data.frame(data_sum_species_test.BL) # reported 
 # as.data.frame(data_sum_species_test.cm) # reported 
-write.csv(file="../../ms_exports/Tables/Table2_swim_BLsummary.csv",
-          data_sum_species_test.BL, row.names=FALSE)
-write.csv(file="../../ms_exports/Tables/Table2_swim_cmsummary.csv",
-          data_sum_species_test.cm, row.names=FALSE)
-# ***********************************************************
 
 
-
-
-
-# ***********************************************************
-## 3.5. SI table 4 ---------
-# summarize all of this by the study, give refs, all levels (category --> smallest level)
-  # split_swimcond<-split(data, data$Swim_Conditions2)
-  # # select needed columns
-  # 
-  # sum_swimcond<-as.data.frame(matrix(nrow=0, ncol=3))
-  # colnames(sum_swimcond)<-c("mainCateg", "subCat", "ref")
-  # for (i in 1:length(split_swimcond)){
-  #   swimcond<-as.data.frame(split_swimcond[i])
-  #   colnames(swimcond)<-colnames(data)
-  #   addDF<-unique(swimcond[, c("Swim_Conditions2",  "Swim_Conditions", "Reference_number_1" )] ) # main swim categ, swim subcat, references 
-  #   colnames(addDF)<-c("mainCateg", "subCat", "ref")
-  #   sum_swimcond<-rbind(sum_swimcond,addDF)
-  #   colnames(sum_swimcond)<-c("mainCateg", "subCat", "ref")
-  # }
-  # 
-  # 
-  # # summarize all of this by the study, give refs, all levels (bof category --> smallest level)
-  # split_fishcond<-split(data, data$Fish_Conditions)
-  # # select needed columns
-  # 
-  # sum_fishcond<-as.data.frame(matrix(nrow=0, ncol=2))
-  # colnames(sum_fishcond)<-c("mainCateg", "ref")
-  # for (i in 1:length(split_fishcond)){
-  #   fishcond<-as.data.frame(split_fishcond[i])
-  #   colnames(fishcond)<-colnames(data)
-  #   addDF<-unique(fishcond[, c("Fish_Conditions", "Reference_number_1")] )
-  #   colnames(addDF)<-c("mainCateg",  "ref")
-  #   sum_fishcond<-rbind(sum_fishcond,addDF)
-  #   colnames(sum_fishcond)<-c("mainCateg", "ref")
-  # }
-  # 
-  # split_swimtest<-split(data, data$Test_performance)
-  # 
-  # sum_swimtest<-as.data.frame(matrix(nrow=0, ncol=3))
-  # colnames(sum_swimtest)<-c("mainCateg", "subCat", "ref")
-  # for (i in 1:length(split_swimtest)){
-  #   swimtest<-as.data.frame(split_swimtest[i])
-  #   colnames(swimtest)<-colnames(data)
-  #   addDF<-unique(swimtest[, c("Test_performance2", "Test_performance", "Reference_number_1")] )
-  #   colnames(addDF)<-c("mainCateg", "subCat", "ref")
-  #   sum_swimtest<-rbind(sum_swimtest,addDF)
-  #   colnames(sum_swimtest)<-c("mainCateg", "subCat", "ref")
-  # }
-  # 
-  # sum_surgery<-as.data.frame(matrix(nrow=0, ncol=2))
-  # colnames(sum_surgery)<-c("mainCateg", "ref")
-  # sum_surgery<-unique(data[, c("Surgery", "Reference_number_1")] )
-  # sum_surgery[order(sum_surgery$Surgery, na.last = TRUE),]
-
+## TABLE A5  ---------
 data_sumSwimCond_cms<-as.data.frame(data %>% 
                            group_by(Swim_Conditions2, Swim_Conditions) %>% 
                            dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                             studies = paste(unique(Reference_number_1), collapse = ', ')))
+                                             studies = paste(unique(Reference_number_1), collapse = ', '))) %>% 
+  write.csv(file = "./ms_exports/Tables/Table_A5.csv")
 
+## TABLE A4  ---------
 data_sumTestCond_cms<-as.data.frame(data %>% 
                                  group_by(Test_performance2, Test_performance) %>% 
                                  dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                                   studies = paste(unique(Reference_number_1), collapse = ', ')))
+                                                   studies = paste(unique(Reference_number_1), collapse = ', '))) %>% 
+  write.csv(file = "./ms_exports/Tables/Table_A4.csv")
 
+## TABLE A7  ---------
 data_sumSurg<-as.data.frame(data %>% 
                                  group_by(Surgery) %>% 
                                  dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                                   studies = paste(unique(Reference_number_1), collapse = ', ')))
+                                                   studies = paste(unique(Reference_number_1), collapse = ', '))) %>% 
+  write.csv(file = "./ms_exports/Tables/Table_A7.csv")
 
+## TABLE A6  ---------
 data_sumFishCond<-as.data.frame(data %>% 
                                  group_by(Fish_Conditions) %>% 
                                  dplyr:::summarize(n_studies_ref_dp=paste(length(unique(Reference_number_1)), " (", length(SWIM_cms),") ", sep = ''),
-                                                   studies = paste(unique(Reference_number_1), collapse = ', ')))
-
-# ***********************************************************
-
+                                                   studies = paste(unique(Reference_number_1), collapse = ', '))) %>% 
+  write.csv(file = "./ms_exports/Tables/Table_A6.csv")
 
 
-
-# ***********************************************************
-## 3.6. SI Table 7 ------------
+## TABLE S1 ------------
 # by Fish condition, man subgroup - USING MEANS ONLY
 data_sum_cond.cm<-data.cm %>% 
   group_by(Fish_Conditions) %>% 
@@ -429,8 +377,10 @@ data_sum_cond.cm<-data.cm %>%
                     min_Temp = min(Temp_test_mean, na.rm = TRUE),
                     max_Temp = max(Temp_test_mean, na.rm = TRUE), 
                     mean_Temp = mean(Temp_test_mean, na.rm = TRUE))%>% 
-  as.data.frame()
+  as.data.frame() %>% 
+  write.csv(file="./ms_exports/Tables/Table_S1.csv", row.names=FALSE)
 
+## TABLE S2 ------------
 data_sum_cond.BL<-data.BL %>% 
   group_by(Fish_Conditions) %>% 
   dplyr:::summarize(min_swim_speedBL = min(swim_speed_MEAN_BL_s, na.rm = TRUE),
@@ -446,23 +396,9 @@ data_sum_cond.BL<-data.BL %>%
                     min_Temp = min(Temp_test_mean, na.rm = TRUE),
                     max_Temp = max(Temp_test_mean, na.rm = TRUE), 
                     mean_Temp = mean(Temp_test_mean, na.rm = TRUE)) %>% 
-  as.data.frame()
+  as.data.frame() %>% 
+  write.csv(file="./ms_exports/Tables/Table_S2.csv", row.names=FALSE)
 
-
-write.csv(file="../../ms_exports/Tables/SI_Table8_FishCondswim_BL.csv",
-          data_sum_cond.BL, row.names=FALSE)
-write.csv(file="../../ms_exports/Tables/SI_Table7_FishCondswim_cm.csv",
-          data_sum_cond.cm, row.names=FALSE)
-
-
-datF.sum<-dataF %>% 
-  group_by(cond, Species_latin) %>% 
-  summarize(mean_swim = mean(SWIM_cms, na.rm =TRUE))
-  
-ggplot(datF.sum, aes(y = mean_swim, x = Species_latin , color = Species_latin, group = cond))+
-  geom_point( size=3 )+
-  geom_text( aes(y = mean_swim, x = Species_latin, label=cond))+
-  facet_wrap(.~Species_latin, nrow=2, scales = "free_x")
 
 
 
