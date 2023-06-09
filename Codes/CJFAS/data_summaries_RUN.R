@@ -27,8 +27,8 @@ dataLab<-as.data.frame(data.all[8])
 # *******************************************
 # how many are estimated? what is estimated:
 
-length(data$SWIM_cms_source[which(data$SWIM_cms_source=="estimated")]) # 759 (feb 28 2023)
-length(data$SWIM_cms_source[which(data$SWIM_cms_source=="reported")]) # 2456 (feb 28 2023)
+length(data$SWIM_cms_source[which(data$SWIM_cms_source=="estimated")]) # 748 (mar 2023)
+length(data$SWIM_cms_source[which(data$SWIM_cms_source=="reported")]) # 2723 (may 2023)
 
 data$length_speed_source<-paste("FL=", data$Length_cm_value_source, "-Speed=", data$SWIM_cms_source,sep="")
 
@@ -75,12 +75,12 @@ data.cm.ucrit<-data.cm[data.cm$Test_performance2=="Ucrit" | data.cm$Test_perform
 data.cm.field<-data.cm[data.cm$Test_performance2=="Field" | data.cm$Test_performance2=="Fishway",]
 data.cm.field.fishway<-data.cm[data.cm$Test_performance2=="Fishway",]
 
-length(levels(factor(data.cm.ucrit[, "Reference_number_1"]))) # 73 
-length(levels(factor(data.cm.field[, "Reference_number_1"]))) # 16
+length(levels(factor(data.cm.ucrit[, "Reference_number_1"]))) # 71 
+length(levels(factor(data.cm.field[, "Reference_number_1"]))) # 24
 
 # Ucrit Umax data stats 
 length(levels(factor(data.cm.ucrit$Species_latin))) # 8 
-nrow(data.cm.ucrit[!is.na(data.cm.ucrit$SWIM_cms),]) # 1131
+nrow(data.cm.ucrit[!is.na(data.cm.ucrit$SWIM_cms),]) # 1246
 summary(data.cm.ucrit$Temp_test_mean)
 summary(data.cm.ucrit$Length_MEAN_cm)
 
@@ -104,10 +104,10 @@ length(levels(factor(data[c(as.numeric(as.character(data$Year_published)) >= 201
 # 1. Atlantic and mykiss
 length(which(data$Species_latin == "Salmo salar")) # 423 (feb 28 2023)
 length(which(data$Species_latin == "Oncorhynchus mykiss")) # 324 (feb 28 2023)
-# 2. N studies: # 105 (feb 28 2023)
-length(unique(data$Reference_number_1))
+# 2. N studies: # 103 (may 2023)
+length(unique(data$Reference_number_1)) 
 # 3. N data points 
-nrow(data) # 3293 (feb 28 2023)
+nrow(data) # 3593 (may 2023)
 
 # max size all fish 
 summary(data$LENGTH_cm)
@@ -226,6 +226,7 @@ data_sum_species_Fig6 <- data %>%
   dplyr:::summarize(min_LengthCM = min(LENGTH_cm, na.rm = TRUE),
                     max_LengthCM = max(LENGTH_cm, na.rm = TRUE),
                     mean_LengthCM = mean(LENGTH_cm, na.rm = TRUE),
+                    range_LengthCM = max_LengthCM - min_LengthCM,
                     min_Temp = min(Temp_test_mean, na.rm = TRUE),
                     max_Temp = max(Temp_test_mean, na.rm = TRUE), 
                     mean_Temp = mean(Temp_test_mean, na.rm = TRUE), 
@@ -400,6 +401,10 @@ data_sum_cond.BL<-data.BL %>%
   write.csv(file="./ms_exports/Tables/Table_S2.csv", row.names=FALSE)
 
 
+# Recovery stats from the qualitative perspective -------
 
-
+# References -------
+length(unique(data$Reference_2))
+length(unique(data$Reference_number_1))
+write.csv(file="./ms_exports/Tables/Appendix_B.csv", data[!duplicated(data$Reference_number_1), c("Reference_number_1", "Test_performance2", "Reference_2")], row.names=FALSE)
 

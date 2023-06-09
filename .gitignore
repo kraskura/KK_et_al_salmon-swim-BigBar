@@ -37,3 +37,10 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+./Codes/archive
+./Codes/CJFAS/unused
+./PSC
+./Data/archive
+
+

@@ -138,10 +138,11 @@ best.model.swim<-mod.size.swimTS.0
 
 # REPORTED <<< 
 summary(best.model.lab)
-summary(best.model.tunnel)
+summary(best.model.tunnel) # species sign, not used for plotting/ main reports 
 summary(best.model.field)
 summary(best.model.fieldh)
 summary(best.model.fieldl)
+
 car:::Anova(best.model.lab, type ="II")
 car:::Anova(best.model.tunnel, type ="II")
 car:::Anova(best.model.fieldh, type ="II")
@@ -339,37 +340,6 @@ dd_TempField<-rbind(Oncorhynchusgorbuscha_dataTemp_Field,
                Oncorhynchusnerka_dataTemp_Field,
                Oncorhynchustshawytscha_dataTemp_Field,
                Oncorhynchusketa_dataTemp_Field)
-
-# ## Topt: find the peaks for species-specific fits (all data except field) -------
-# P.chin<-function(x){coef(modI.chin)[1]  + x^1 * coef(modI.chin)[2] + x^2*coef(modI.chin)[3] }
-# o.chin<- optimize(f = P.chin, interval = c(8,20), maximum = TRUE)
-# 
-# P.chum<-function(x){coef(modI.chum)[1]  + x^1 * coef(modI.chum)[2] + x^2*coef(modI.chum)[3] }
-# o.chum<- optimize(f = P.chum, interval = c(0,30), maximum = TRUE)
-# 
-# P.coho<-function(x){coef(modI.coho)[1]  + x^1 * coef(modI.coho)[2] + x^2*coef(modI.coho)[3] }
-# o.coho<- optimize(f = P.coho, interval = c(5,18), maximum = TRUE)
-# 
-# P.salar<-function(x){coef(modI.salar)[1]  + x^1 * coef(modI.salar)[2] + x^2*coef(modI.salar)[3] }
-# o.salar<- optimize(f = P.salar, interval = c(3,23), maximum = TRUE)
-# 
-# P.trouts<-function(x){coef(modI.trouts)[1]  + x^1 * coef(modI.trouts)[2] + x^2*coef(modI.trouts)[3] }
-# o.trouts<- optimize(f = P.trouts, interval = c(6,20), maximum = TRUE)
-# 
-# P.soc<-function(x){coef(modI.soc)[1]  + x^1 * coef(modI.soc)[2] + x^2*coef(modI.soc)[3] }
-# o.soc<- optimize(f = P.soc, interval = c(8,26), maximum = TRUE)
-# 
-# P.pink<-function(x){coef(modI.pink)[1]  + x^1 * coef(modI.pink)[2] + x^2*coef(modI.pink)[3] }
-# o.pink<- optimize(f = P.pink, interval = c(6,28), maximum = TRUE)
-
-# create a data frame with the estimated peaks 
-# fit.peaks<-data.frame(
-#   opt.T = c(o.coho$maximum, o.pink$maximum, o.salar$maximum, o.trouts$maximum, o.soc$maximum), # o.chin$maximum, 
-#   opt.speed = c( o.coho$objective, o.pink$objective, o.salar$objective, o.trouts$objective, o.soc$objective), # o.chin$objective,
-#   Species_latin = c("Oncorhynchus kisutch", "Oncorhynchus gorbuscha", "Salmo salar", "Oncorhynchus mykiss", "Oncorhynchus nerka") # "Oncorhynchus tshawytscha", 
-# )
-
-
 
 pred.temp<-as.data.frame(expand.grid(Temp_test_mean = seq(min(data.cm$Temp_test_mean, na.rm =T), max(data.cm$Temp_test_mean, na.rm =T), 0.5), 
                                    LENGTH_cm = mean(data.cm$LENGTH_cm, na.rm =T),
@@ -637,7 +607,7 @@ grid2<-plot_grid(
           align = "hvr")
 
 grid3<-plot_grid(
-           Oncorhynchuskisutch_plotTempLab,
+          Oncorhynchuskisutch_plotTempLab,
           Oncorhynchusmykiss_plotTempLab,
           Oncorhynchustshawytscha_plotTempLab,
           label_x = c(0.17, 0.17, 0.17),
@@ -687,6 +657,10 @@ dataLab %>%
   ungroup() %>% 
   as.data.frame()
 
+dataLab %>%
+  dplyr::group_by(Species_latin) %>%
+  dplyr::summarize(n = n())
+  
 data.soc<-dataLab[dataLab$Species_latin == "Oncorhynchus nerka", ]
 data.soc.sufficient<-data.soc[c(data.soc$population == "Chilko Lake" | 
                                 data.soc$population == "Early Stuart" |
@@ -697,12 +671,29 @@ data.soc.sufficient<-data.soc[c(data.soc$population == "Chilko Lake" |
                                 data.soc$population == "Stellako" |
                                 data.soc$population == "Lower Adams") & !is.na(data.soc$population),]
 
+data.soc.sufficient<-data.soc.sufficient %>%
+    mutate(Surgery2 = if_else(is.na(Surgery), "No Surgery", "Surgery"))
+
+data.soc.sufficient %>%
+  dplyr::group_by(population, Surgery2) %>%
+  dplyr::summarize(n = n())
+
 chilko<-data.soc[data.soc$population == "Chilko Lake",]
+chilko<-chilko[-c(which(grepl("NA", rownames(chilko)))),]
 ES<-data.soc[data.soc$population == "Early Stuart",]
+ES<-ES[-c(which(grepl("NA", rownames(ES)))),]
 GC<-data.soc[data.soc$population == "Gates Creek",]
+GC<-GC[-c(which(grepl("NA", rownames(GC)))),]
 quesnel<-data.soc[data.soc$population == "Quesnel",]
+quesnel<-quesnel[-c(which(grepl("NA", rownames(quesnel)))),]
 Somass<-data.soc[data.soc$population == "Somass River Aggregate",]
+Somass<-Somass[-c(which(grepl("NA", rownames(Somass)))),]
 WC<-data.soc[data.soc$population == "Weaver Creek ",]
+WC<-WC[-c(which(grepl("NA", rownames(WC)))),]
+LA<-data.soc[data.soc$population == "Lower Adams",]
+LA<-LA[-c(which(grepl("NA", rownames(LA)))),]
+Ste<-data.soc[data.soc$population == "Stellako",]
+Ste<-Ste[-c(which(grepl("NA", rownames(Ste)))),]
 
 mod.chilko<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = chilko)
 mod.ES<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = ES)
@@ -710,8 +701,19 @@ mod.GC<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.
 mod.quesnel<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = quesnel)
 mod.Somass<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = Somass)
 mod.WC<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = WC)
+mod.LA<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = LA)
+mod.Ste<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = Ste)
 
-chilko.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(chilko$Temp_test_mean, na.rm =T),
+summary(mod.chilko)
+summary(mod.ES)
+summary(mod.GC)
+summary(mod.quesnel)
+summary(mod.Somass)
+summary(mod.WC)
+summary(mod.LA)
+summary(mod.Ste)
+
+mod.ESchilko.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(chilko$Temp_test_mean, na.rm =T),
                                                             max(chilko$Temp_test_mean, na.rm =T), 0.5), 
                                        LENGTH_cm = mean(chilko$LENGTH_cm, na.rm =T)))
 chilko.pred$pred.val<-predict(mod.chilko, newdata = chilko.pred, interval = "confidence")[,1]
@@ -762,21 +764,40 @@ WC.pred$pred.modCI.h<-predict(mod.WC, newdata = WC.pred, interval = "confidence"
 WC.pred$pred.modCI.l<-predict(mod.WC, newdata = WC.pred, interval = "confidence")[,3]
 WC.pred$population<-"Weaver Creek "
 
-data.pop.soc<-rbind(WC.pred, chilko.pred, quesnel.pred, Somass.pred, ES.pred, GC.pred)
+LA.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(LA$Temp_test_mean, na.rm =T),
+                                                            max(LA$Temp_test_mean, na.rm =T), 0.5), 
+                                       LENGTH_cm = mean(LA$LENGTH_cm, na.rm =T)))
+LA.pred$pred.val<-predict(mod.LA, newdata = LA.pred, interval = "confidence")[,1]
+LA.pred$pred.modCI.h<-predict(mod.LA, newdata = LA.pred, interval = "confidence")[,2]
+LA.pred$pred.modCI.l<-predict(mod.LA, newdata = LA.pred, interval = "confidence")[,3]
+LA.pred$population<-"Lower Adams"
+
+
+Ste.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(Ste$Temp_test_mean, na.rm =T),
+                                                            max(Ste$Temp_test_mean, na.rm =T), 0.5), 
+                                       LENGTH_cm = mean(Ste$LENGTH_cm, na.rm =T)))
+Ste.pred$pred.val<-predict(mod.Ste, newdata = Ste.pred, interval = "confidence")[,1]
+Ste.pred$pred.modCI.h<-predict(mod.Ste, newdata = Ste.pred, interval = "confidence")[,2]
+Ste.pred$pred.modCI.l<-predict(mod.Ste, newdata = Ste.pred, interval = "confidence")[,3]
+Ste.pred$population<-"Stellako"
+
+
+data.pop.soc<-rbind(WC.pred, chilko.pred, quesnel.pred, Somass.pred, ES.pred, GC.pred, LA.pred, Ste.pred)
 data.pop.soc$Species_latin<-"Oncorhynchus nerka"
 
-plot.soc<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_test_mean, colour=Species_latin))+
+
+plot.soc<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_test_mean, colour=Species_latin, shape = Surgery2))+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                      labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
                      values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
   scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-  geom_point( alpha=1, size=1)+
+  geom_point( alpha=1)+
   facet_wrap(.~population)+
   scale_shape_manual(values = c(19, 21, 20, 22, 3, 23))+
   ylim(0, 250)+
-  geom_line(data = data.pop.soc, aes(y=pred.val, x=Temp_test_mean), color = "black")+  
+  geom_line(data = data.pop.soc, aes(y=pred.val, x=Temp_test_mean, shape = NULL), color = "black")+  
   geom_ribbon(data = data.pop.soc,
               aes(y = NULL,
               shape = NULL,
@@ -788,12 +809,10 @@ plot.soc<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_test
               alpha = 0.3)+
   scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
 ggformat(plot.soc, print=F, y_title = " Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 12)
-plot.soc<-plot.soc+theme(legend.position = "none")
+plot.soc<-plot.soc+theme(legend.position = "right")
 plot.soc
 
 
-data.soc.sufficient<-data.soc.sufficient %>%
-    mutate(Surgery2 = if_else(is.na(Surgery), "No Surgery", "Surgery"))
 
 plot.soc2<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_test_mean,
                                                           colour=Species_latin,
