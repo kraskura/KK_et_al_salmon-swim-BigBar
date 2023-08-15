@@ -42,5 +42,6 @@ vignettes/*.pdf
 ./Codes/CJFAS/unused
 ./PSC
 ./Data/archive
+./Figures/drafts
 
 

@@ -1,0 +1,48 @@
+Track_ID,axis unit,Unit, ,Area,Mean,Min,Max,X,Y,,,,, ,
+y-axis,1,,1,0,23,23,23,248,611,23,2,Burnett et al 2014b,,,
+y-axis,1.7,,2,0,22,22,22,248.5,352.5,23,2,Burnett et al 2014b,,,
+y-axis,2.1,bl/s,3,0,25,25,25,248.5,205.5,23,2,Burnett et al 2014b,,,
+Swim speed,releaseMquart2,bl/s,4,0,105,105,105,339.5,690,23,2,Burnett et al 2014b,M,release,quart2
+Swim speed,releaseMmean,bl/s,5,0,3,3,3,340,617.5,23,2,Burnett et al 2014b,M,release,mean
+Swim speed,releaseMmedian,bl/s,6,0,13,13,13,351,618,23,2,Burnett et al 2014b,M,release,median
+Swim speed,releaseMquart3,bl/s,7,0,8,8,8,335.5,544,23,2,Burnett et al 2014b,M,release,quart3
+Swim speed,releaseFquart1,bl/s,8,0,81,81,81,521,626.5,23,2,Burnett et al 2014b,F,release,quart1
+Swim speed,releaseFquart2,bl/s,9,0,20,20,20,520.5,514.5,23,2,Burnett et al 2014b,F,release,quart2
+Swim speed,releaseFmean,bl/s,10,0,0,0,0,520.5,480,23,2,Burnett et al 2014b,F,release,mean
+Swim speed,releaseFmedian,bl/s,11,0,1,1,1,521.5,469.5,23,2,Burnett et al 2014b,F,release,median
+Swim speed,releaseFquart3,bl/s,12,0,50,50,50,521,433,23,2,Burnett et al 2014b,F,release,quart3
+Swim speed,releaseFquart4,bl/s,13,0,3,3,3,520,359,23,2,Burnett et al 2014b,F,release,quart4
+Swim speed,radialMquart1,bl/s,14,0,27,27,27,700.5,711,23,2,Burnett et al 2014b,M,radial,quart1
+Swim speed,radial Mquart2,bl/s,15,0,6,6,6,700.5,702.5,23,2,Burnett et al 2014b,M,radial ,quart2
+Swim speed,radialMmean,bl/s,16,0,1,1,1,700.5,646.5,23,2,Burnett et al 2014b,M,radial,mean
+Swim speed,radial Mmedian,bl/s,17,0,21,21,21,713.5,646,23,2,Burnett et al 2014b,M,radial ,median
+Swim speed,radialMquart3,bl/s,18,0,57,57,57,700.5,589,23,2,Burnett et al 2014b,M,radial,quart3
+Swim speed,radial Mquart4,bl/s,19,0,3,3,3,700,581.5,23,2,Burnett et al 2014b,M,radial ,quart4
+Swim speed,radialFquart1,bl/s,20,0,172,172,172,882,679,23,2,Burnett et al 2014b,F,radial,quart1
+Swim speed,radial Fquart2,bl/s,21,0,27,27,27,882,607,23,2,Burnett et al 2014b,F,radial ,quart2
+Swim speed,radial Fmedian,bl/s,22,0,2,2,2,881,552.5,23,2,Burnett et al 2014b,F,radial ,median
+Swim speed,radial Fmean,bl/s,23,0,3,3,3,882,533.5,23,2,Burnett et al 2014b,F,radial ,mean
+Swim speed,radial Fquart3,bl/s,24,0,73,73,73,881.5,474,23,2,Burnett et al 2014b,F,radial ,quart3
+Swim speed,radial Fquart4,bl/s,25,0,23,23,23,881,361,23,2,Burnett et al 2014b,F,radial ,quart4
+Swim speed,entranceMquart1,bl/s,26,0,105,105,105,1062,527.5,23,2,Burnett et al 2014b,M,entrance,quart1
+Swim speed,entranceMquart2,bl/s,27,0,7,7,7,1062,513,23,2,Burnett et al 2014b,M,entrance,quart2
+Swim speed,entranceMmedian,bl/s,28,0,0,0,0,1061.5,501,23,2,Burnett et al 2014b,M,entrance,median
+Swim speed,entranceMmean,bl/s,29,0,1,1,1,1062.5,446.5,23,2,Burnett et al 2014b,M,entrance,mean
+Swim speed,entranceMquart3,bl/s,30,0,18,18,18,1062.5,406.5,23,2,Burnett et al 2014b,M,entrance,quart3
+Swim speed,entranceMquart4,bl/s,31,0,7,7,7,1061.5,314.5,23,2,Burnett et al 2014b,M,entrance,quart4
+Swim speed,entranceFquart1,bl/s,32,0,64,64,64,1242.5,467,23,2,Burnett et al 2014b,F,entrance,quart1
+Swim speed,entranceFquart2,bl/s,33,0,19,19,19,1241,394,23,2,Burnett et al 2014b,F,entrance,quart2
+Swim speed,entranceFmedian,bl/s,34,0,1,1,1,1241.5,330,23,2,Burnett et al 2014b,F,entrance,median
+Swim speed,entranceFmean,bl/s,35,0,3,3,3,1242,306.5,23,2,Burnett et al 2014b,F,entrance,mean
+Swim speed,entranceFquart3,bl/s,36,0,62,62,62,1242.5,206.5,23,2,Burnett et al 2014b,F,entrance,quart3
+Swim speed,entranceFquart4,bl/s,37,0,70,70,70,1242,136.5,23,2,Burnett et al 2014b,F,entrance,quart4
+Swim speed,forebayMquart1,bl/s,38,0,13,13,13,1423,599,23,2,Burnett et al 2014b,M,forebay,quart1
+Swim speed,forebayMquart2,bl/s,39,0,0,0,0,1422.5,536,23,2,Burnett et al 2014b,M,forebay,quart2
+Swim speed,forebayMmean,bl/s,40,0,1,1,1,1422,512,23,2,Burnett et al 2014b,M,forebay,mean
+Swim speed,forebayMmedian,bl/s,41,0,0,0,0,1422.5,471,23,2,Burnett et al 2014b,M,forebay,median
+Swim speed,forebayMquart3,bl/s,42,0,0,0,0,1422.5,467.5,23,2,Burnett et al 2014b,M,forebay,quart3
+Swim speed,forebayMquart4,bl/s,43,0,5,5,5,1422.5,463,23,2,Burnett et al 2014b,M,forebay,quart4
+Swim speed,forebayFquart2,bl/s,44,0,1,1,1,1602.5,496.75,23,2,Burnett et al 2014b,F,forebay,quart2
+Swim speed,forebayFmean,bl/s,45,0,0,0,0,1602.5,493.75,23,2,Burnett et al 2014b,F,forebay,mean
+Swim speed,forebayFmedian,bl/s,46,0,0,0,0,1602.25,492.25,23,2,Burnett et al 2014b,F,forebay,median
+Swim speed,forebayFquart3,bl/s,47,0,30,30,30,1602.25,485.5,23,2,Burnett et al 2014b,F,forebay,quart3

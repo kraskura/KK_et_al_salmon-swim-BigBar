@@ -1,0 +1,23 @@
+Track_ID,axis unit,Unit, ,Area,Mean,Min,Max,X,Y,Ref ,plot,
+y-axis,0,BL/s,1,0,0,0,0,147.333,852.667,5,5,Farrel et al 1998
+y-axis,1,BL/s,2,0,0,0,0,146.667,520,5,5,Farrel et al 1998
+Ucrit,norm-1,BL/s,3,0,8,8,8,286,371.333,5,5,Farrel et al 1998
+Ucrit,norm-1SEM,SEM BL/s,4,0,244,244,244,286,341.333,5,5,Farrel et al 1998
+Ucrit,norm-2,BL/s,5,0,255,255,255,379.333,390,5,5,Farrel et al 1998
+Ucrit,norm-2SEM,SEM BL/s,6,0,0,0,0,378.667,361.333,5,5,Farrel et al 1998
+Ucrit,norm-3,BL/s,7,0,255,255,255,470.667,464,5,5,Farrel et al 1998
+Ucrit,norm-3SEM,SEM BL/s,8,0,0,0,0,470.667,422.667,5,5,Farrel et al 1998
+Ucrit,pcp-1,BL/s,9,0,0,0,0,656.667,427.333,5,5,Farrel et al 1998
+Ucrit,pcp-2SEM,SEM BL/s,10,0,141,141,141,656.667,390.667,5,5,Farrel et al 1998
+Ucrit,pcp-2,BL/s,11,0,96,96,96,748.667,457.333,5,5,Farrel et al 1998
+Ucrit,pcp-2SEM,SEM BL/s,12,0,5,5,5,748.667,420.667,5,5,Farrel et al 1998
+Ucrit,pcp-3,BL/s,13,0,208,208,208,840,440,5,5,Farrel et al 1998
+Ucrit,pcp-3SEM,SEM BL/s,14,0,0,0,0,840,415.5,5,5,Farrel et al 1998
+Ucrit,hyp-pcp-1,BL/s,15,0,248,248,248,1025.5,451,5,5,Farrel et al 1998
+Ucrit,hyp-pcp-1SEM,SEM BL/s,16,0,0,0,0,1025.5,436.5,5,5,Farrel et al 1998
+Ucrit,hyp-pcp-2,BL/s,17,0,7,7,7,1118,389.5,5,5,Farrel et al 1998
+Ucrit,hyp-pcp-2SEM,SEM BL/s,18,0,246,246,246,1118,372,5,5,Farrel et al 1998
+Ucrit,hyp-pcp-3,BL/s,19,0,0,0,0,1211,450.5,5,5,Farrel et al 1998
+Ucrit,hyp-pcp-3SEM,SEM BL/s,20,0,3,3,3,1210.5,429.5,5,5,Farrel et al 1998
+Ucrit,hyp-1,BL/s,21,0,199,199,199,1395,456.333,5,5,Farrel et al 1998
+Ucrit,hyp-1SEM,SEM BL/s,22,0,5,5,5,1395,413,5,5,Farrel et al 1998

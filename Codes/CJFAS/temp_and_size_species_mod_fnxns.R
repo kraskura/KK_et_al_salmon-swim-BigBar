@@ -58,11 +58,15 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
         model<-lm(SWIM_cms ~ Temp_test_mean + LENGTH_cm, na.action=na.exclude, data = dd)
       }
       
-      dd_pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(dd$Temp_test_mean, na.rm =T), max(dd$Temp_test_mean, na.rm =T), 0.5), 
+      dd_pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(dd$Temp_test_mean, na.rm =T),
+                                                              max(dd$Temp_test_mean, na.rm =T),
+                                                              0.5), 
                                          LENGTH_cm = mean(dd$LENGTH_cm, na.rm =T), Species_latin = species))
       
       dd_pred.size<-as.data.frame(expand.grid(Temp_test_mean = mean(dd$Temp_test_mean, na.rm =T), 
-                                         LENGTH_cm = seq(min(dd$LENGTH_cm, na.rm =T), max(dd$LENGTH_cm, na.rm =T), 1),
+                                         LENGTH_cm = seq(min(dd[!is.na(dd$Temp_test_mean), "LENGTH_cm"], na.rm =T),
+                                                         max(dd$LENGTH_cm, na.rm =T),
+                                                         1),
                                          Species_latin = species))
       
       data.pred.CI<-predict(model, newdata = dd_pred, interval = "confidence") 
@@ -112,7 +116,7 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
         geom_ribbon(data=dd_pred, aes(y = NULL, ymin = pred.modCI.l,
                         ymax = pred.modCI.h,  fill=Species_latin, colour=Species_latin, group = Species_latin ), alpha = 0.3)+
         geom_line(data=dd_pred, aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
-        ylim(ylim_low, ylim_high)+
+        coord_cartesian(ylim = c(ylim_low, ylim_high), xlim = c(0,100)) +
         scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
       ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 10)
       plot.sp.t<-plot.sp.t + theme(legend.position = "none", 
@@ -140,7 +144,7 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
       geom_ribbon(data = dd_pred.size, aes( y = NULL, ymin = pred.modCI.l, ymax = pred.modCI.h), alpha = 0.3)+
       geom_line(data = dd_pred.size, aes(y=pred.mod, x=LENGTH_cm), color = "black")+
       scale_x_continuous(limits = c(30, 100), breaks = c(30, 40, 50, 60, 70, 80, 90))+
-      ylim(ylim_low, ylim_high)+
+      coord_cartesian(ylim = c(ylim_low, ylim_high)) +
       geom_text(mapping = aes( x = 45, y = ylim_high-10), label = data.subsetID, color = "black", size=4.5)
       ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 12)
       plot.sp.s<-plot.sp.s+theme(legend.position = "none")

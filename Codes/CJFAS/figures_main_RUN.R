@@ -1,4 +1,5 @@
 
+# last run: aug 15 2023
 
 library(ggsci)
 library(ggridges)
@@ -9,14 +10,14 @@ library(here)
 library(ggformat2)
 
 # Source data and code: ---------
-source("./Codes/PSC/table_BIC.R")
+source("./Codes/table_BIC.R")
 source("./Codes/get_dataset.R")
 # *************************
 
 
 # 1. import and wrangle the data -------------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "./Data/Files/Kraskura_salmonSwim_analysis_feb2023.csv")
+  data.file = "./Data/Files/Kraskura_salmonSwim_analysis_aug2023.csv")
 
 # view(data)
 # all but time to fatigue tests for general analysis:
@@ -27,7 +28,7 @@ data.BL<-data[!is.na(data$swim_speed_MEAN_BL_s),]
 data.cm<-data[!is.na(data$SWIM_cms),]
 dataF<-as.data.frame(data.all[7])
 dataLab<-as.data.frame(data.all[8])
-
+dataLab<-dataLab[!c(dataLab$Test_performance2=="TTF"),] 
 # estimated anaerobic > 2 BL/s
 data.cm$anaerob<-0
 for(i in 1:nrow(data.cm)){
@@ -39,14 +40,6 @@ for(i in 1:nrow(data.cm)){
   }
 }
 data.cm$anaerob<-as.factor(data.cm$anaerob)
-data.BL.pink<-data.BL[data.BL$Species_latin == "Oncorhynchus gorbuscha",]
-data.cm.pink<-data.cm[data.cm$Species_latin == "Oncorhynchus gorbuscha",]
-
-data.BL.soc<-data.BL[data.BL$Species_latin == "Oncorhynchus nerka",]
-data.cm.soc<-data.cm[data.cm$Species_latin == "Oncorhynchus nerka",]
-
-data.BL.coho<-data.BL[data.BL$Species_latin == "Oncorhynchus kisutch",]
-data.cm.coho<-data.cm[data.cm$Species_latin == "Oncorhynchus kisutch",]
 
 # reported only cm/s
 data.cm.rep<-data.cm[data.cm$SWIM_cms_source == "reported",]
@@ -303,7 +296,7 @@ cowplot::plot_grid( test_condcm, test_condBL,
          width = 9.5, height = 5,units = "in")
 
 
-## Supplemental Fig 4. [cm/s] Scaling of swimming --------
+## Misc Fig. [cm/s] Scaling of swimming --------
 p1.cm<-ggplot(data=data.cm, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
                                                                  colour=Species_latin,
                                                                  # shape=Sex_F_M,
@@ -359,7 +352,7 @@ cowplot::plot_grid(p1.cm, p1.cmSI,
                   label_x = c(0.18),
                   label_y = c(0.9),
                   rel_heights = c(1, 1)) %>%
-ggsave(filename = "./ms_exports/Figures/FigS4_abs_size_speed.png",
+ggsave(filename = "./ms_exports/Figures/misc_abs_size_speed.png",
        width = 5.5, height = 9,units = "in")
 
 
@@ -414,7 +407,7 @@ cowplot::plot_grid(p1.BL, p1.BLSI,
                   label_x = c(0.18),
                   label_y = c(0.9),
                   rel_heights = c(1, 1)) %>%
-ggsave(filename = "./ms_exports/Figures/FigS5_rel_size_speed.png",
+ggsave(filename = "./ms_exports/Figures/misc_rel_size_speed.png",
        width = 5.5, height = 9,units = "in")
 
 ## Supplemental Fig 2. [cm/s] Temperature performance curves of swimming--------
@@ -462,7 +455,7 @@ cowplot::plot_grid(p2.cm, p2.cmSI,
                   label_x = c(0.18),
                   label_y = c(0.9),
                   rel_heights = c(1, 1)) %>%
-ggsave(filename = "./ms_exports/Figures/FigS2_abs_temp_speed.png",
+ggsave(filename = "./ms_exports/Figures/misc_abs_temp_speed.png",
        width = 5.5, height = 9,units = "in")
 
 
@@ -509,7 +502,7 @@ cowplot::plot_grid(p2.BL, p2.BLSI,
                   label_x = c(0.18),
                   label_y = c(0.9),
                   rel_heights = c(1, 1)) %>%
-ggsave(filename = "./ms_exports/Figures/FigS3_rel_temp_speed.png",
+ggsave(filename = "./ms_exports/Figures/misc_rel_temp_speed.png",
        width = 5.5, height = 9,units = "in")
 
 
@@ -567,10 +560,11 @@ ggformat(ttf.p.prol.inset, print=TRUE, y_title = "Swim speed (cm/s)", x_title = 
 ttf.p.prol.inset <- ttf.p.prol.inset + theme(legend.text = element_text(face = "italic"),
                                             legend.position = "none",
                                             legend.title = element_blank())
+ttf.p.prol.inset.leg <- ttf.p.prol.inset + theme(legend.text = element_text(face = "italic"),
+                                            legend.position = "top",
+                                            legend.title = element_blank())
+legend.ttf<- cowplot::get_legend(ttf.p.prol.inset.leg)
 
-# legend.ttf<- cowplot::get_legend(ttf.p.pro.inset )
-
-# ttf.p.pro.inset
 
 ttf.p.1H<-ggplot(data = data.ttf[data.ttf$Duration_swim<=20/60/60, ], aes(y=SWIM_cms, x=Duration_swim*60*60, color = Species_latin, fill = Species_latin))+
   # geom_point(pch=21, alpha=1,  show.legend = F)+
@@ -597,10 +591,10 @@ cowplot::plot_grid(ttf.p.1H, ttf.p.prol, ttf.p, ttf.p.prol.inset,
                     # label_size = 17,
                     label_x = c(0.2, 0.2),
                     label_y = c(0.89, 0.91)) %>% 
-ggsave(filename = "./ms_exports/Figures/FigMain_ttf.png",
+ggsave(filename = "./ms_exports/Figures/Fig_9_ttf.png",
          width = 8, height = 8,units = "in")
 
-ggsave(filename = "./ms_exports/Figures/FigureMain_ttf_legend.png", legend.ttf)
+ggsave(filename = "./ms_exports/Figures/Fig_9_legend.png", legend.ttf)
 
 ## Supplemental Fig 6: [cms] Sex -------------------
 swim_sex.cm<-ggplot(data = dataLab,
@@ -639,7 +633,7 @@ cowplot::plot_grid( swim_sex.cm, swim_sex.cmF,
                     labels = c("A - lab", "B - field"),
                     label_x = c(0.1),
                     label_y = c(0.9, 0.9)) %>% 
-  ggsave(filename = "./ms_exports/Figures/FigS6_abs_sex_species.png",
+  ggsave(filename = "./ms_exports/Figures/FigS2_abs_sex_species.png",
          width = 7, height = 10,units = "in")
 
 
@@ -682,7 +676,7 @@ cowplot::plot_grid( cond3, cond2, cond1,
                     label_x = c(0.2, 0.2, 0.2),
                     label_y = c(0.9, 0.9, 0.9),
                     rel_widths = c(0.85,0.85,1.2)) %>% 
-  ggsave(filename = "./ms_exports/Figures/FigS8_abs_correlations.png",
+  ggsave(filename = "./ms_exports/Figures/FigS3_abs_correlations.png",
          width = 13, height = 4,units = "in")
 
 
@@ -728,7 +722,7 @@ cowplot::plot_grid( fish_condcm,fish_condBL,
                    label_x = c(0.1),
                    label_y = c(0.90, 0.8),
                    rel_heights = c(0.8,1)) %>% 
-  ggsave(filename = "./ms_exports/Figures/FigS9_cms_Fish_Cond.png",
+  ggsave(filename = "./ms_exports/Figures/FigS4_cms_Fish_Cond.png",
          width = 8, height = 10,units = "in")
 
 

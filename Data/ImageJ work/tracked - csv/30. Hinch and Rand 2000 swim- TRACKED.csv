@@ -1,0 +1,22 @@
+,,, ,Area,Mean,Min,Max,X,Y,,,
+y-axis,0,m/s,1,0,202,202,202,280.5,437,30,,Hinch and Rand 2000
+y-axis,0.5,m/s,2,0,4,4,4,280,356.5,30,,Hinch and Rand 2000
+y-axis,1,m/s,3,0,4,4,4,281,277,30,,Hinch and Rand 2000
+y-axis,1.5,m/s,4,0,4,4,4,281.5,198.5,30,,Hinch and Rand 2000
+y-axis,2,m/s,5,0,4,4,4,281,118.5,30,,Hinch and Rand 2000
+x-axis,0,m/s,6,0,4,4,4,428.5,438.5,30,,Hinch and Rand 2000
+x-axis,0.2,m/s,7,0,4,4,4,571,438,30,,Hinch and Rand 2000
+x-axis,0.4,m/s,8,0,4,4,4,716,436,30,,Hinch and Rand 2000
+x-axis,0.6,m/s,9,0,4,4,4,860.333,438.333,30,,Hinch and Rand 2000
+x-axis,0.8,m/s,10,0,4,4,4,1005.667,438.333,30,,Hinch and Rand 2000
+Swim speed,black,m/s,11,0,4,4,4,303.5,294.5,30,,Hinch and Rand 2000
+Swim speed,black,m/s,12,0,63,63,63,501.75,289.75,30,,Hinch and Rand 2000
+Swim speed,black,m/s,13,0,4,4,4,505.5,285.25,30,,Hinch and Rand 2000
+Swim speed,black,m/s,14,0,4,4,4,634.333,269.667,30,,Hinch and Rand 2000
+Swim speed,black,m/s,15,0,4,4,4,928,146.5,30,,Hinch and Rand 2000
+Swim speed,black,m/s,16,0,4,4,4,967.5,155,30,,Hinch and Rand 2000
+Swim speed,gray ,m/s,17,0,206,206,206,557.5,353,30,,Hinch and Rand 2000
+Swim speed,gray ,m/s,18,0,206,206,206,586,321.5,30,,Hinch and Rand 2000
+Swim speed,gray ,m/s,19,0,206,206,206,791,90.667,30,,Hinch and Rand 2000
+Swim speed,white,m/s,20,0,255,255,255,607.667,371.333,30,,Hinch and Rand 2000
+Swim speed,white,m/s,21,0,255,255,255,802.333,337.333,30,,Hinch and Rand 2000

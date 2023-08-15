@@ -1,3 +1,6 @@
+
+# last run aug 15 2023
+
 # ******************************
 # Import libraries, source data. -----------
 library(lme4)
@@ -22,7 +25,7 @@ source("./Codes/table_BIC.R")
 
 # 1. Import and organize data sets --------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "./Data/Files/Kraskura_salmonSwim_analysis_feb2023.csv")
+  data.file = "./Data/Files/Kraskura_salmonSwim_analysis_aug2023.csv")
 
 # available datasets: data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim
 
@@ -33,10 +36,10 @@ data.ttf<-data[c(data$Test_performance2=="TTF"),]
 # field and lab, no TTF - TFF as a whole different category 
 data<-data[!c(data$Test_performance2=="TTF"),]
 # field data 
-dataF<-as.data.frame(data.all[7])
+dataF<-as.data.frame(data.all[7]) # includes field, jump, and data collected at fishways
 # lab data
 dataLab<-as.data.frame(data.all[8]) # no TTF
-dataLab<-dataLab[!c(dataLab$Test_performance2=="TTF"),]
+dataLab<-dataLab[!c(dataLab$Test_performance2=="TTF"),]    
 
 # absolute and relative swim speed data
 data.BL<-data[!is.na(data$swim_speed_MEAN_BL_s),]
@@ -138,7 +141,7 @@ best.model.swim<-mod.size.swimTS.0
 
 # REPORTED <<< 
 summary(best.model.lab)
-summary(best.model.tunnel) # species sign, not used for plotting/ main reports 
+summary(best.model.tunnel) # species significant, not used for plotting/ main reports 
 summary(best.model.field)
 summary(best.model.fieldh)
 summary(best.model.fieldl)
@@ -189,7 +192,7 @@ size.field.l.n<-unlist(summary(best.model.fieldl)[[3]][2])[1]
 # ******************************************************
 # 4. Temperature and size species specific relationships: ------------
 
-size.sum.Lab<-dataLab %>%
+size.sum.Lab<-dataLab[!is.na(dataLab$Temp_test_mean),] %>%
   dplyr::group_by(Species_latin) %>%
   summarise(n=n(),
             minsize = min(LENGTH_cm, na.rm = TRUE),
@@ -198,7 +201,11 @@ size.sum.Lab<-dataLab %>%
             maxtemp = max(Temp_test_mean, na.rm = T),
             n_studies = length(unique(Reference_number_1)))
 
-size.sum.Lab.Test<-dataLab %>%
+size.sum.Lab.Test<-dataLab[!is.na(dataLab$Temp_test_mean),]%>%
+  dplyr::group_by(Test_performance2) %>%
+  summarise(n=n(),
+            n_studies = length(unique(Reference_number_1)))
+size.sum.Lab.Test.NOTincluded<-dataLab[is.na(dataLab$Temp_test_mean),]%>%
   dplyr::group_by(Test_performance2) %>%
   summarise(n=n(),
             n_studies = length(unique(Reference_number_1)))
@@ -240,7 +247,13 @@ dataLab %>%
   dplyr::group_by(Species_latin) %>%
   do(broom::tidy(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, ., na.action=na.exclude))) %>% 
   ungroup() %>% 
-  as.data.frame()
+  as.data.frame() %>% 
+write.csv(file = "./ms_exports/Tables/Table_2.csv", row.names = FALSE)
+
+dataLab[is.na(dataLab$SWIM_cms),]
+dataLab %>%
+  dplyr::group_by(Species_latin) %>%
+  count()
 # ******************************************************
 
 # raw with size in the model 
@@ -417,9 +430,9 @@ p1.cm.Lab<-ggplot(data=dataLab, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
   annotate(geom = "text", y = 785, x = 72, hjust = 0, color = "black", size = 3,
          label = bquote( U[max] * ": N = " * .(size.sum.Lab.Test$n[4]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[3]) * ")"))+
   annotate(geom = "text", y = 735, x = 72, hjust = 0, color = "black", size = 3,
-         label = bquote( Swim * ": N = " * .(size.sum.Lab.Test$n[2]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[2]) * ")"))+
+         label = bquote( Swim * "*: N = " * .(size.sum.Lab.Test.NOTincluded$n[2]) ~ " (n = " * .(size.sum.Lab.Test.NOTincluded$n_studies[2]) * ")"))+
   annotate(geom = "text", y = 685, x = 72, hjust = 0, color = "black", size = 3,
-         label = bquote( Jump * ": N = " * .(size.sum.Lab.Test$n[1]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[1]) * ")"))+
+         label = bquote( Jump * "*: N = " * .(size.sum.Lab.Test.NOTincluded$n[1]) ~ " (n = " * .(size.sum.Lab.Test.NOTincluded$n_studies[1]) * ")"))+
   geom_ribbon(data=pred.size,
               aes(y = NULL, ymin = fit.mod.lab.CI.l, ymax = fit.mod.lab.CI.h,
                   fill=Species_latin, colour=Species_latin, group = Species_latin, label = NULL),
@@ -713,7 +726,7 @@ summary(mod.WC)
 summary(mod.LA)
 summary(mod.Ste)
 
-mod.ESchilko.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(chilko$Temp_test_mean, na.rm =T),
+chilko.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(chilko$Temp_test_mean, na.rm =T),
                                                             max(chilko$Temp_test_mean, na.rm =T), 0.5), 
                                        LENGTH_cm = mean(chilko$LENGTH_cm, na.rm =T)))
 chilko.pred$pred.val<-predict(mod.chilko, newdata = chilko.pred, interval = "confidence")[,1]
@@ -827,7 +840,7 @@ plot.soc2<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_tes
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
   geom_point( alpha=1, size=1)+
   facet_wrap(.~population, nrow = 4)+
-  scale_shape_manual(values = c(1, 19, 21))+
+  scale_shape_manual(values = c(19, 1))+
   ylim(0, 250)+
   geom_smooth(method= "lm", formula = y ~ poly(x, 2, raw = T))+
   # geom_text(size=1, check_overlap = T)+
@@ -846,8 +859,8 @@ ggformat(plot.soc2, print=F, y_title = " Swim speed (cm/s)", x_title = "Temperat
 plot.soc2<-plot.soc2+theme(legend.position = "top", legend.title = element_blank())
 plot.soc2
 
-ggsave(filename = "./ms_exports/Figures/Fig6-SOCKEYE.png",plot.soc2,
-         width = 4, height = 7, units = "in")
+ggsave(filename = "./ms_exports/Figures/Fig6-SOCKEYE.png",plot.soc,
+         width = 7, height = 6, units = "in")
 
 
 

@@ -1,10 +1,11 @@
-# (feb 28 2023)
+
+#  last run aug 15 2023
 # 0. source data and code: ---------
 source("./Codes/get_dataset.R")
 
 # 1. import and wrangle the data -------------
 data.all<-get.adult.salmonid.swim.data(
-  data.file = "./Data/Files/Kraskura_salmonSwim_analysis_feb2023.csv")
+  data.file = "./Data/Files/Kraskura_salmonSwim_analysis_aug2023.csv")
 
 # all but time to fatigue tests for general analysis:
 data<-as.data.frame(data.all[1])
@@ -17,6 +18,7 @@ data.BL<-data[!is.na(data$swim_speed_MEAN_BL_s),]
 data.cm<-data[!is.na(data$SWIM_cms),]
 dataF<-as.data.frame(data.all[7])
 dataLab<-as.data.frame(data.all[8])
+dataLab<-dataLab[!c(dataLab$Test_performance2=="TTF"),] 
 
 # return(invisible(list(data, fresh, salt, male, female, mixedsex, Fieldswim, Labswim)))
 
@@ -70,26 +72,52 @@ total<-data[which(!is.na(data$SWIM_cms)),
 nrow(total) == nrow(est)+nrow(est2)+nrow(rep)+nrow(rep2)
 
 
-# 2. mini stats and numbers ------
+# 2. mini stats and numbers for specific subsets ------
+# absolute swim speeds only
 data.cm.ucrit<-data.cm[data.cm$Test_performance2=="Ucrit" | data.cm$Test_performance2=="Umax",]
 data.cm.field<-data.cm[data.cm$Test_performance2=="Field" | data.cm$Test_performance2=="Fishway",]
 data.cm.field.fishway<-data.cm[data.cm$Test_performance2=="Fishway",]
+# absolute and relative swim speeds
+data.tunnel<-dataLab[dataLab$Test_performance2=="Ucrit" | dataLab$Test_performance2=="Umax",]
+data.fishway<-dataF[dataF$Test_performance2=="Fishway",]
+# Studies for jump only 
+data.cm.jump<-data.cm[c(data.cm$Test_performance2=="Jump" & !is.na(data.cm$Temp_test_mean) & !is.na(data.cm$LENGTH_cm)),]
 
-length(levels(factor(data.cm.ucrit[, "Reference_number_1"]))) # 71 
-length(levels(factor(data.cm.field[, "Reference_number_1"]))) # 24
+
+# lab ucrit and umax only
+length(levels(factor(data.cm.ucrit[, "Reference_number_1"]))) # 71 cm/s only 
+length(levels(factor(data.tunnel[, "Reference_number_1"]))) # 71 Bl/s and cm/s
+
+# field and fishway data 
+length(levels(factor(data.cm.field[, "Reference_number_1"]))) # 22
+length(levels(factor(dataF[, "Reference_number_1"]))) # 25
+
+# fishway only data
+length(levels(factor(data.cm.field.fishway[, "Reference_number_1"]))) # 8
+length(levels(factor(data.fishway[, "Reference_number_1"]))) # 9
 
 # Ucrit Umax data stats 
 length(levels(factor(data.cm.ucrit$Species_latin))) # 8 
-nrow(data.cm.ucrit[!is.na(data.cm.ucrit$SWIM_cms),]) # 1246
+nrow(data.cm.ucrit[!is.na(data.cm.ucrit$SWIM_cms),]) # 1263
 summary(data.cm.ucrit$Temp_test_mean)
 summary(data.cm.ucrit$Length_MEAN_cm)
 
 summary(data.cm.ucrit[!is.na(data.cm.ucrit$SWIM_cms), "SWIM_cms"]) 
 summary(data.cm.ucrit[!is.na(data.cm.ucrit$SWIM_cms), "swim_speed_MEAN_BL_s"]) 
+# same as tunnel 
 
 # summary Jump studies 
 data.jump<-data.cm[data.cm$Test_performance2=="Jump",]
 summary(data.jump$SWIM_cms)
+
+# Studies for Ucrit and Umax only, BL and cm 
+length(unique(data.tunnel$Reference_number_1))
+summary(data.tunnel$Temp_test_mean)
+summary(data.tunnel$LENGTH_cm)
+nrow(data.tunnel)
+summary(data.tunnel$swim_speed_MEAN_BL_s)
+summary(data.tunnel$SWIM_cms)
+
 
 # what is the year range that these data cover?
 summary(as.numeric(as.character(data$Year_published))) # 1956 - 2022
@@ -102,15 +130,16 @@ length(levels(factor(data[c(as.numeric(as.character(data$Year_published)) >= 201
 
 
 # 1. Atlantic and mykiss
-length(which(data$Species_latin == "Salmo salar")) # 423 (feb 28 2023)
-length(which(data$Species_latin == "Oncorhynchus mykiss")) # 324 (feb 28 2023)
-# 2. N studies: # 103 (may 2023)
-length(unique(data$Reference_number_1)) 
+length(which(data$Species_latin == "Salmo salar")) # 423 (aug 15 2023)
+length(which(data$Species_latin == "Oncorhynchus mykiss")) # 318 (aug 15 2023)
+# 2. N studies: # 103 (aug 15 2023)
+length(unique(data$Reference_number_1))  # +2 Erikas studies, these are combo
 # 3. N data points 
-nrow(data) # 3593 (may 2023)
+nrow(data) # 3523 (aug 2023)
 
 # max size all fish 
 summary(data$LENGTH_cm)
+# view(data[,c("LENGTH_cm","Species_latin", "Reference_2")])
 
 # get reference list to report 
 data.UniqueRef<-data[!duplicated(data$Reference_number_1),c("Reference_number_1", "Reference_2")]
@@ -133,13 +162,14 @@ summary(dataF[dataF$Sex_F_M == "F","SWIM_cms"], na.rm = T)
 summary(dataF[dataF$Sex_F_M == "M","SWIM_cms"], na.rm = T)
 
 # how many tracking studies? 
-tracking<-data[c(data$Tracking=="1"), ]
-lab<-data[c(data$Tracking=="0"), ]
-length(unique(tracking$Reference_number)) # 24
-length(unique(lab$Reference_number)) # 74
+tracking<-data[c(data$Tracking=="y"), ]
+lab<-data[c(data$Tracking=="n"), ]
+length(unique(tracking$Reference_number)) # 23 (aug 15 2023)
+length(unique(lab$Reference_number)) # 85 (aug 15 2023)
 
-data[which(data$Test_performance!="Field" & data$Tracking=="1"), ] # Geist et al - EMG tag calibr
-data[which(data$Test_performance=="Field" & data$Tracking=="0"), ] # Swim study right in the field, fish swum in near dam, but not tagged/tracked ref 53, Weaver study
+# sanity checks 
+data[which(data$Test_performance!="Field" & data$Tracking=="1"), ]
+data[which(data$Test_performance=="Field" & data$Tracking=="0"), ] 
 
 # What is the absolute temperature range? 
 # obtain all categorical variables 
@@ -148,23 +178,37 @@ unique(data$Swim_Conditions)
 unique(data$Fish_Conditions)
 unique(data$Surgery)
 
-# different Fish conditions 
-# 
-# unique(data$Condition_category)
-# summary(data$Condition_category)
-
 unique(as.factor(data$Test_performance2))
 summary(as.factor(data$Test_performance2))
 summary(as.factor(data$Test_performance))
 
-
 # reported: N from Umax, N from Ucrit
-nrow(data.cm[(data.cm$Species_latin == "Oncorhynchus gorbuscha" & data.cm$Test_performance2 == "Umax" & !is.na(data.cm$Temp_test_mean)),]) # 132 (feb 28 2023)
-nrow(data.cm[(data.cm$Species_latin == "Oncorhynchus gorbuscha" & data.cm$Test_performance2 == "Ucrit" & !is.na(data.cm$Temp_test_mean)),]) # 59 (feb 28 2023)
-nrow(data.cm[(data.cm$Species_latin == "Oncorhynchus gorbuscha" & !is.na(data.cm$Temp_test_mean)),]) # 215 (feb 28 2023)
+nrow(data.cm[(data.cm$Species_latin == "Oncorhynchus gorbuscha" & data.cm$Test_performance2 == "Umax" & !is.na(data.cm$Temp_test_mean)),]) # 132 (aug 15 2023)
+nrow(data.cm[(data.cm$Species_latin == "Oncorhynchus gorbuscha" & data.cm$Test_performance2 == "Ucrit" & !is.na(data.cm$Temp_test_mean)),]) # 59 (aug 15 2023)
+nrow(data.cm[(data.cm$Species_latin == "Oncorhynchus gorbuscha" & !is.na(data.cm$Temp_test_mean)),]) # 215 (aug 15 2023)
 
-# n populations sockeye
+# sockeye salmon data 
 summary(factor(data[(data$Species_latin == "Oncorhynchus nerka"),"population"]))
+length(unique(data[(data$Species_latin == "Oncorhynchus nerka"),"population"]))
+data.cm.soc<-data.cm[data.cm$Species_latin == "Oncorhynchus nerka",]
+summary(data.cm.soc) # all tests including TTF 
+nrow(data.cm.soc)
+length(unique(data.cm.soc$Reference_number_1))
+summary(data.cm.soc[data.cm.soc$Test_performance2 =="Ucrit", "SWIM_cms"])
+
+# pink salmon data
+data.pink<-dataLab[dataLab$Species_latin == "Oncorhynchus gorbuscha",]
+nrow(data.pink[data.pink$Reference_number_1==24,])# Clark et al data  ref # 24 
+nrow(data.pink)
+summary(data.pink$Temp_test_mean) 
+
+# chinook and chum sample sizes and temp ranges
+data.chum<-dataLab[dataLab$Species_latin == "Oncorhynchus keta",]
+data.chin<-dataLab[dataLab$Species_latin == "Oncorhynchus tshawytscha",]
+nrow(data.chum)
+nrow(data.chin)
+summary(data.chin$Temp_test_mean)
+summary(data.chum$Temp_test_mean)
 
 # 3. data estimate summaries  ----------
 # ****************************************************
@@ -401,7 +445,6 @@ data_sum_cond.BL<-data.BL %>%
   write.csv(file="./ms_exports/Tables/Table_S2.csv", row.names=FALSE)
 
 
-# Recovery stats from the qualitative perspective -------
 
 # References -------
 length(unique(data$Reference_2))
