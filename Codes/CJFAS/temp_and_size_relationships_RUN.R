@@ -16,7 +16,10 @@ library(merTools) # for CI of lmer models
 library(dplyr)
 library(lattice)
 library(here)
+library(sjPlot)
 library(ggformat2)  # ggplot formatting from github 
+library(simr)
+library(tictoc) # to time how long the power analysis runs 
 
 source("./Codes/get_dataset.R")
 source("./Codes/CJFAS/temp_and_size_species_mod_fnxns.R")
@@ -152,20 +155,23 @@ car:::Anova(best.model.fieldh, type ="II")
 car:::Anova(best.model.fieldl, type ="II")
 car:::Anova(best.model.field, type ="II")
 
+# post hoc for the lab tunnel only test: for species. 
+# emmeans::ref_grid(object = best.model.tunnel)
+  
 # assumptions
-plot(best.model.lab)
-plot(best.model.tunnel)
-plot(best.model.field) # can see the outliers on this, overall ok
-plot(best.model.fieldh)
-plot(best.model.fieldl)
-plot(best.model.swim)
+# plot(best.model.lab)
+# plot(best.model.tunnel)
+# plot(best.model.field) # can see the outliers on this, overall ok
+# plot(best.model.fieldh)
+# plot(best.model.fieldl)
+# plot(best.model.swim)
 
-hist(resid(best.model.lab))
-hist(resid(best.model.tunnel))
-hist(resid(best.model.field)) # can see the outliers on this, overall ok
-hist(resid(best.model.fieldh))
-hist(resid(best.model.fieldl))
-hist(resid(best.model.swim))
+# hist(resid(best.model.lab))
+# hist(resid(best.model.tunnel))
+# hist(resid(best.model.field)) # can see the outliers on this, overall ok
+# hist(resid(best.model.fieldh))
+# hist(resid(best.model.fieldl))
+# hist(resid(best.model.swim))
 # hist(resid(best.model.jump))
 
 # # fixed effects (coefs for plotting)
@@ -185,6 +191,87 @@ size.field.l.int<-round(fixef(best.model.fieldl)[1], 2)
 size.field.l.slope<-round(fixef(best.model.fieldl)[2], 2)
 size.field.l.n<-unlist(summary(best.model.fieldl)[[3]][2])[1]
 
+## 3.2. Power analysis -------
+tic(msg = "power analysis")
+
+# this take a while, can be up to an h, uncomment to run. 
+
+  # car:::Anova(best.model.fieldh, type ="II")
+  # car:::Anova(best.model.fieldl, type ="II")
+  # car:::Anova(best.model.field, type ="II")
+  # 
+  # # Green and McLeod 2015 Methods in Ecology and Evolution 
+  # # https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12504
+  # 
+  # # 1. create model 
+  # doTest(best.model.fieldh, fixed("LENGTH_cm","chisq"))
+  # doTest(best.model.fieldl, fixed("LENGTH_cm","chisq"))
+  # 
+  # # a. rename models to use
+  # pwr.fieldh.1<-best.model.fieldh
+  # pwr.fieldh.0.5<-best.model.fieldh
+  # pwr.fieldl.1<-best.model.fieldl
+  # pwr.fieldl.0.2<-best.model.fieldl
+  # 
+  # # b. reassign new effect size for mass. 
+  # fixef(pwr.fieldh.1)["LENGTH_cm"]<- -1 # observed: -0.83
+  # fixef(pwr.fieldh.0.5)["LENGTH_cm"]<- -0.5
+  # 
+  # fixef(pwr.fieldl.1)["LENGTH_cm"]<- -1 # observed: -0.54
+  # fixef(pwr.fieldl.0.2)["LENGTH_cm"]<- -0.2
+  # 
+  # # c. simulate power (same sample sizes)
+  # effsize.h.1_pwr0<-powerSim(pwr.fieldh.1) # nrow = 47
+  # effsize.h.0.5_pwr0<-powerSim(pwr.fieldh.0.5) # nrow = 47
+  # effsize.l.1_pwr0<-powerSim(pwr.fieldl.1) # nrow = 266
+  # effsize.l.0.2_pwr0<-powerSim(pwr.fieldl.0.2) # nrow = 266
+  # 
+  # # d. increase power along x axis (total sample size)
+  # # pwr.fieldh1.n10 <- extend(pwr.fieldh.1, along="LENGTH_cm", n=10)
+  # # pwr.fieldh1.5.n10 <- extend(pwr.fieldh.0.5, along="LENGTH_cm", n=10)
+  # 
+  # pwr.fieldh.1.n100 <- extend(pwr.fieldh.1, along="LENGTH_cm", n=100)
+  # pwr.fieldh.0.5.n100 <- extend(pwr.fieldh.0.5, along="LENGTH_cm", n=100)
+  # 
+  # pwr.fieldl.1.n100 <- extend(pwr.fieldl.1, along="LENGTH_cm", n=100)
+  # pwr.fieldl.0.2.n100 <- extend(pwr.fieldl.0.2, along="LENGTH_cm", n=100)
+  # 
+  # # e. simulate power
+  # # set.seed(123) # the simulation uses MonteCarlo simulation, set seed to make it reproducible
+  # effsize.1_pwr<-powerSim(pwr.fieldh.1.n100) # nrow = 
+  # effsize.0.5_pwr<-powerSim(pwr.fieldh.0.5.n100) # nrow = 
+  # 
+  # effsizel.1_pwr<-powerSim(pwr.fieldl.1.n100) # nrow = 
+  # effsizel.0.2_pwr<-powerSim(pwr.fieldl.0.2.n100) # nrow = 
+  # 
+  # # f. power curve
+  # effsize.1_pwc<-powerCurve(pwr.fieldh.1.n100, along = "LENGTH_cm") # 
+  # effsize.0.5_pwc<-powerCurve(pwr.fieldh.0.5.n100, along = "LENGTH_cm") # 
+  # 
+  # effsizel.1_pwc<-powerCurve(pwr.fieldl.1.n100, along = "LENGTH_cm") # 
+  # effsizel.0.2_pwc<-powerCurve(pwr.fieldl.0.2.n100, along = "LENGTH_cm") # 
+  # 
+  # png("./Figures/Power_analysis_highSwimSpeeds.png",
+  #     width=6, height=9, units="in", res=200)
+  #   par(mfrow=c(2,1)) 
+  #   plot(effsize.1_pwc)
+  #   plot(effsize.0.5_pwc)
+  # dev.off()
+  # 
+  # png("./Figures/Power_analysis_lowSwimSpeeds.png",
+  #     width=6, height=9, units="in", res=200)
+  #   par(mfrow=c(2,1)) 
+  #   plot(effsizel.1_pwc)
+  #   plot(effsizel.0.2_pwc)
+  # dev.off()
+  # 
+  # toc()
+
+sjPlot::tab_model(best.model.fieldh)
+sjPlot::tab_model(best.model.field)
+sjPlot::tab_model(best.model.fieldl)
+sjPlot::tab_model(best.model.lab)
+
 # *********** END *************************************
 
 
@@ -201,14 +288,20 @@ size.sum.Lab<-dataLab[!is.na(dataLab$Temp_test_mean),] %>%
             maxtemp = max(Temp_test_mean, na.rm = T),
             n_studies = length(unique(Reference_number_1)))
 
-size.sum.Lab.Test<-dataLab[!is.na(dataLab$Temp_test_mean),]%>%
-  dplyr::group_by(Test_performance2) %>%
-  summarise(n=n(),
-            n_studies = length(unique(Reference_number_1)))
+# size.sum.Lab.Test<-dataLab[!is.na(dataLab$Temp_test_mean),]%>%
+#   dplyr::group_by(Test_performance2) %>%
+#   summarise(n=n(),
+#             n_studies = length(unique(Reference_number_1)))
 size.sum.Lab.Test.NOTincluded<-dataLab[is.na(dataLab$Temp_test_mean),]%>%
   dplyr::group_by(Test_performance2) %>%
   summarise(n=n(),
             n_studies = length(unique(Reference_number_1)))
+
+size.sum.Lab.Test<-dataLab%>%
+  dplyr::group_by(Test_performance2) %>%
+  summarise(n=n(),
+            n_studies = length(unique(Reference_number_1)))
+
 
 size.sum.field<-data.cm.field %>%
   dplyr::group_by(Species_latin) %>%
@@ -249,6 +342,22 @@ dataLab %>%
   ungroup() %>% 
   as.data.frame() %>% 
 write.csv(file = "./ms_exports/Tables/Table_2.csv", row.names = FALSE)
+
+# Supplemental Table 
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Salmo salar",], na.action=na.exclude), type = "II")
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Oncorhynchus nerka",], na.action=na.exclude), type = "II")
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Oncorhynchus kisutch",], na.action=na.exclude), type = "II")
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Oncorhynchus keta",], na.action=na.exclude), type = "II")
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Oncorhynchus tshawytscha",], na.action=na.exclude), type = "II")
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Oncorhynchus gorbuscha",], na.action=na.exclude), type = "II")
+car::Anova(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm,
+   data = dataLab[dataLab$Species_latin == "Oncorhynchus mykiss",], na.action=na.exclude), type = "II")
 
 dataLab[is.na(dataLab$SWIM_cms),]
 dataLab %>%
@@ -423,16 +532,16 @@ p1.cm.Lab<-ggplot(data=dataLab, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
   geom_point(size=2, alpha=0.4)+
   geom_hline(yintercept = 250, color = "grey", size=0.3, lty=2)+
   scale_shape_manual(values = c(21,23))+
-  annotate(geom = "text", x =72, y = 885, label = expression(bold("Lab tests")),
+  annotate(geom = "text", x =72, y = 890, label = expression(bold("Lab tests")),
            color = "black", size=5, hjust = 0)+
-  annotate(geom = "text", y = 835, x = 72, hjust = 0, color = "black", size = 3,
+  annotate(geom = "text", y = 835, x = 65, hjust = 0, color = "black", size = 4,
          label = bquote( U[crit] * ": N = " * .(size.sum.Lab.Test$n[3]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[4]) * ")"))+
-  annotate(geom = "text", y = 785, x = 72, hjust = 0, color = "black", size = 3,
+  annotate(geom = "text", y = 780, x = 65, hjust = 0, color = "black", size = 4,
          label = bquote( U[max] * ": N = " * .(size.sum.Lab.Test$n[4]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[3]) * ")"))+
-  annotate(geom = "text", y = 735, x = 72, hjust = 0, color = "black", size = 3,
-         label = bquote( Swim * "*: N = " * .(size.sum.Lab.Test.NOTincluded$n[2]) ~ " (n = " * .(size.sum.Lab.Test.NOTincluded$n_studies[2]) * ")"))+
-  annotate(geom = "text", y = 685, x = 72, hjust = 0, color = "black", size = 3,
-         label = bquote( Jump * "*: N = " * .(size.sum.Lab.Test.NOTincluded$n[1]) ~ " (n = " * .(size.sum.Lab.Test.NOTincluded$n_studies[1]) * ")"))+
+  annotate(geom = "text", y = 725, x = 65, hjust = 0, color = "black", size = 4,
+         label = bquote( Swim * "*: N = " * .(size.sum.Lab.Test$n[2]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[2]) * ")"))+
+  annotate(geom = "text", y = 670, x = 65, hjust = 0, color = "black", size = 4,
+         label = bquote( Jump * "*: N = " * .(size.sum.Lab.Test$n[1]) ~ " (n = " * .(size.sum.Lab.Test$n_studies[1]) * ")"))+
   geom_ribbon(data=pred.size,
               aes(y = NULL, ymin = fit.mod.lab.CI.l, ymax = fit.mod.lab.CI.h,
                   fill=Species_latin, colour=Species_latin, group = Species_latin, label = NULL),
@@ -440,7 +549,7 @@ p1.cm.Lab<-ggplot(data=dataLab, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
   geom_line(data = pred.size, mapping =aes(y=fit.mod.lab, x=LENGTH_cm, label=NULL), color = "black", size=0.6)+
   xlim(15, 100)+
   scale_y_continuous(limits = c(0,900), breaks = c(100, 200, 300, 400, 500, 600, 700, 800, 900))
-ggformat(p1.cm.Lab, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="")
+ggformat(p1.cm.Lab, print=T, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="", size =14 )
 p1.cm.Lab<-p1.cm.Lab +
   theme (axis.ticks.x = element_line(size = 1),
          # axis.text.x = element_text(angle=45, hjust=1, size=12),
@@ -456,11 +565,11 @@ p1.cmF<-ggplot(data=data.cm.field, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_lat
                                       colour=Species_latin,
                                       label=Reference_number_1, 
                                       shape = Test_performance2))+
-  annotate(geom = "text", y = 750, x = 15, hjust = 0, color = "black", size = 3,
+  annotate(geom = "text", y = 750, x = 15, hjust = 0, color = "black", size = 4,
          label = bquote( "N = " * .(size.field.n)))+
-  annotate(geom = "text", y = 700, x = 15, hjust = 0, color = "black", size = 3,
+  annotate(geom = "text", y = 695, x = 15, hjust = 0, color = "black", size = 4,
          label = bquote( "N (> 250 cm/s) = " * .(size.field.h.n)))+
-  annotate(geom = "text", y = 650, x = 15, hjust = 0, color = "black", size = 3,
+  annotate(geom = "text", y = 640, x = 15, hjust = 0, color = "black", size = 4,
          label = bquote( "N (< 250 cm/s) = " * .(size.field.l.n)))+
   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
@@ -489,7 +598,7 @@ p1.cmF<-ggplot(data=data.cm.field, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_lat
   xlim(15, 100)+
   scale_y_continuous(limits = c(0,900), breaks = c(100, 200, 300, 400, 500, 600, 700, 800, 900))
 
-ggformat(p1.cmF, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="")
+ggformat(p1.cmF, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="", size =14)
 p1.cmF<-p1.cmF+theme(legend.position = "none")
 p1.cmF
 
@@ -530,7 +639,7 @@ p2.PREDFIT_full <- ggplot(data = dd_TempLab[!c(dd_TempLab$Species_latin == "Onco
   scale_shape_manual(values = c(21,23))+
   scale_x_continuous(breaks = c(0, 5, 10, 15, 20, 25, 30), limits = c(0, 30))+
   ylim(0, 200)
-ggformat(p2.PREDFIT_full, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="")
+ggformat(p2.PREDFIT_full, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size = 14)
 p2.PREDFIT_full<-p2.PREDFIT_full+theme(legend.position = "none",
                                        plot.margin=margin(t = 0, unit="cm", r = 0.1, l = 0.5))
 p2.PREDFIT_full
@@ -581,9 +690,9 @@ p2.size_hist<-
 theme_minimal()+
   xlab("Length (cm)")+
   theme(axis.title.y = element_blank(),
-        axis.title.x = element_text(vjust = +2),
+        axis.title.x = element_text(vjust = +2, size = 14),
         axis.text.y = element_blank(),
-        axis.text.x = element_text(colour = "black", size =12),
+        axis.text.x = element_text(colour = "black", size =14),
         panel.grid.major = element_blank(),
         # panel.grid.minor = element_blank(),
         axis.ticks.x = element_line(size = 0.5), 
@@ -615,7 +724,7 @@ grid2<-plot_grid(
           nrow = 3,
           ncol = 1,
           labels = c("A", "C", "E"),
-          label_x = c(0.2, 0.2, 0.2),
+          label_x = c(0.26, 0.26, 0.26),
           label_y = c(0.96, 0.96, 0.96),
           align = "hvr")
 
@@ -663,7 +772,7 @@ cowplot::plot_grid(p1.cm.Lab, p1.cmF,
 
 
 
-## POPULATION PLOT SOCKEYE ----------------
+## POPULATION-specific SOCKEYE data ----------------
 dataLab %>%
   dplyr::group_by(Species_latin) %>%
   do(broom::tidy(lm(SWIM_cms ~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, ., na.action=na.exclude))) %>% 
@@ -717,6 +826,7 @@ mod.WC<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.
 mod.LA<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = LA)
 mod.Ste<-lm(SWIM_cms~ poly(Temp_test_mean, 2, raw = T) + LENGTH_cm, na.action=na.exclude, data = Ste)
 
+# summaries
 summary(mod.chilko)
 summary(mod.ES)
 summary(mod.GC)
@@ -725,6 +835,27 @@ summary(mod.Somass)
 summary(mod.WC)
 summary(mod.LA)
 summary(mod.Ste)
+
+# confidence intervals for each parameter 
+confint(mod.chilko)
+confint(mod.ES)
+confint(mod.GC)
+confint(mod.quesnel)
+confint(mod.Somass)
+confint(mod.WC)
+confint(mod.LA)
+confint(mod.Ste)
+
+# anova type II for each population
+car::Anova(mod.chilko, type = "II")
+car::Anova(mod.ES, type = "II")
+car::Anova(mod.GC, type = "II")
+car::Anova(mod.quesnel, type = "II")
+car::Anova(mod.Somass, type = "II")
+car::Anova(mod.WC, type = "II")
+car::Anova(mod.LA, type = "II")
+car::Anova(mod.Ste, type = "II")
+
 
 chilko.pred<-as.data.frame(expand.grid(Temp_test_mean = seq(min(chilko$Temp_test_mean, na.rm =T),
                                                             max(chilko$Temp_test_mean, na.rm =T), 0.5), 
@@ -797,6 +928,8 @@ Ste.pred$population<-"Stellako"
 
 data.pop.soc<-rbind(WC.pred, chilko.pred, quesnel.pred, Somass.pred, ES.pred, GC.pred, LA.pred, Ste.pred)
 data.pop.soc$Species_latin<-"Oncorhynchus nerka"
+data.soc.sufficient[data.soc.sufficient$population=="Somass River Aggregate","population"] <- "Somass"
+data.pop.soc[data.pop.soc$population=="Somass River Aggregate","population"] <- "Somass"
 
 
 plot.soc<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_test_mean, colour=Species_latin, shape = Surgery2))+
@@ -825,24 +958,25 @@ ggformat(plot.soc, print=F, y_title = " Swim speed (cm/s)", x_title = "Temperatu
 plot.soc<-plot.soc+theme(legend.position = "right")
 plot.soc
 
-
-
 plot.soc2<-ggplot(data=data.soc.sufficient, mapping = aes(y=SWIM_cms, x=Temp_test_mean,
-                                                          colour=Species_latin,
+                                                          colour=population,
+                                                          fill=population,
                                                           group = population,
                                                           shape = Surgery2,
                                                           label = Reference_number_1))+
-  scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
-                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
-                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-  scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
-                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
-                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-  geom_point( alpha=1, size=1)+
-  facet_wrap(.~population, nrow = 4)+
+  # scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+  #                    labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+  #                    values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  # scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
+  #                   labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
+  #                   values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
+  # geom_point( alpha=1, size=1)+
+  # facet_wrap(.~population, nrow = 4)+
   scale_shape_manual(values = c(19, 1))+
   ylim(0, 250)+
-  geom_smooth(method= "lm", formula = y ~ poly(x, 2, raw = T))+
+  geom_smooth(method= "lm", formula = y ~ poly(x, 2, raw = T), alpha =0.2)+
+  scale_color_lancet()+
+  scale_fill_lancet()+
   # geom_text(size=1, check_overlap = T)+
   # geom_line(data = data.pop.soc, aes(y=pred.val, x=Temp_test_mean, group = population), color = "#EA573D", size = 1)+  
   # geom_ribbon(data = data.pop.soc,
@@ -860,290 +994,8 @@ plot.soc2<-plot.soc2+theme(legend.position = "top", legend.title = element_blank
 plot.soc2
 
 ggsave(filename = "./ms_exports/Figures/Fig6-SOCKEYE.png",plot.soc,
-         width = 7, height = 6, units = "in")
+         width = 8, height = 6.5, units = "in")
 
+ggsave(filename = "./ms_exports/Figures/FigSuppl-SOCKEYE.png",plot.soc2,
+         width = 5, height = 5, units = "in")
 
-
-  ## NOT USED --------
-  # 
-  # # *********** START ***************************************
-  # ## 3.2. Field. INCLUDES ONE JUMP STUDY: species-specific, cm/s -------
-  # # 1. pink : "Oncorhynchus gorbuscha"
-  # mod.size.field.pink<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus gorbuscha"),])
-  # CI.pink<-confint(mod.size.field.pink)
-  # par(mfrow = c(2, 2), oma = c(0, 0, 2, 0))
-  # # plot(mod.size.field.pink)
-  # data.pred.CI.field.pink<-as.data.frame(predict(mod.size.field.pink, interval = "confidence")) 
-  # 
-  # # 2. sockeye: Oncorhynchus nerka
-  # mod.size.field.soc<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus nerka"),])
-  # CI.soc<-confint(mod.size.field.soc)
-  # # plot(mod.size.field.soc)
-  # data.pred.CI.field.soc<-as.data.frame(predict(mod.size.field.soc, interval = "confidence")) 
-  # 
-  # # 3. trouts: Oncorhynchus mykiss
-  # mod.size.field.trouts<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus mykiss"),])
-  # CI.trouts<-confint(mod.size.field.trouts)
-  # # plot(mod.size.field.trouts)
-  # data.pred.CI.field.trouts<-as.data.frame(predict(mod.size.field.trouts, interval = "confidence")) 
-  # 
-  # # 4. chinook: Oncorhynchus tshawytscha
-  # mod.size.field.chin<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus tshawytscha"),])
-  # CI.chin<-confint(mod.size.field.chin)
-  # # plot(mod.size.field.chin) # bad
-  # data.pred.CI.field.chin<-as.data.frame(predict(mod.size.field.chin, interval = "confidence")) 
-  # 
-  # # 5. chum: Oncorhynchus keta
-  # mod.size.field.chum<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus keta"),])
-  # CI.chum<-confint(mod.size.field.chum)
-  # # plot(mod.size.field.chum)
-  # data.pred.CI.field.chum<-as.data.frame(predict(mod.size.field.chum, interval = "confidence")) 
-  # 
-  # # summaries 
-  # data.cm.field.sp<-data.cm.field[!(data.cm.field$Species_latin == "Oncorhynchus masou" | # n = 4
-  #                                  data.cm.field$Species_latin == "Salmo salar" | # n = 3
-  #                                  data.cm.field$Species_latin == "Oncorhynchus kisutch" | # n = 5
-  #                                     data.cm.field$Species_latin == "Oncorhynchus spp." ),] # 2
-  # data.cm.field.sp$Species_latin<-factor(data.cm.field.sp$Species_latin)
-  # # No species specific fits, just not that many data points, low size range, not reliable
-  # data.cm.field.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   summarise(n=n(), minsize = min(LENGTH_cm), maxsize = max(LENGTH_cm), n_studies = length(unique(Reference_number_1)))
-  # # summary of all fits
-  # data.cm.field.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   do(broom::tidy(lm(SWIM_cms~ LENGTH_cm, ., na.action=na.exclude))) %>% 
-  #   ungroup()
-  # # *********** END *************************************
-  # 
-  # 
-  # # only low swim speeds (comparable with Ucrit, < 250 cm/s)
-  # 
-  # data.cm.field.l.sp<-data.cm.field.l[!(data.cm.field.l$Species_latin == "Oncorhynchus masou" |
-  #                                     data.cm.field.l$Species_latin == "Salmo salar" |
-  #                                     data.cm.field.l$Species_latin == "Oncorhynchus kisutch" |
-  #                                     data.cm.field.l$Species_latin == "Oncorhynchus spp."),]
-  # data.cm.field.l.sp$Species_latin<-factor(data.cm.field.l.sp$Species_latin)
-  # 
-  # 
-  # # No species specific fits, just not that many data points, low size range, not reliable
-  # data.cm.field.l.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   summarise(n=n(), minsize = min(LENGTH_cm), maxsize = max(LENGTH_cm), n_studies = length(unique(Reference_number_1)))
-  # 
-  # # for summary of all fits 
-  # data.cm.field.l.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   do(broom::tidy(lm(SWIM_cms~ LENGTH_cm, ., na.action=na.exclude))) %>% 
-  #   ungroup()
-  # 
-  # # And high speeds:
-  # data.cm.field.h.sp<-data.cm.field.h[!(data.cm.field.h$Species_latin == "Oncorhynchus masou" |
-  #                                     data.cm.field.h$Species_latin == "Salmo salar" |
-  #                                     data.cm.field.h$Species_latin == "Oncorhynchus kisutch" |
-  #                                     data.cm.field.h$Species_latin == "Oncorhynchus spp."),]
-  # data.cm.field.h.sp$Species_latin<-factor(data.cm.field.h.sp$Species_latin)
-  # 
-  # 
-  # # No species specific fits, just not that many data points, low size range, not reliable
-  # data.cm.field.h.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   summarise(n=n(), minsize = min(LENGTH_cm), maxsize = max(LENGTH_cm), n_studies = length(unique(Reference_number_1)))
-  # 
-  # # for summary of all fits 
-  # data.cm.field.h.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   do(broom::tidy(lm(SWIM_cms~ LENGTH_cm, ., na.action=na.exclude))) %>% 
-  #   ungroup()
-  # # *********** END **************************************
-  # 
-  # 
-  # ## 3.3. Tunnel swim speeds UCRIT AND UMAX ONLY: species-specific, cm/s ---------
-  # # ******************************************************
-  # # species specific fits, CI of models, resid plots
-  # # 1. pink : "Oncorhynchus gorbuscha"
-  # mod.size.tunnel.pink<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Oncorhynchus gorbuscha"),])
-  # CI.tunnelpink<-confint(mod.size.tunnel.pink)
-  # # plot(mod.size.tunnel.pink)
-  # data.pred.CI.tunnel.pink<-as.data.frame(predict(mod.size.tunnel.pink, interval = "confidence")) 
-  # 
-  # # 2. sockeye: Oncorhynchus nerka
-  # mod.size.tunnel.soc<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Oncorhynchus nerka"),])
-  # CI.tunnelsoc<-confint(mod.size.tunnel.soc)
-  # # plot(mod.size.tunnel.soc)
-  # data.pred.CI.tunnel.soc<-as.data.frame(predict(mod.size.tunnel.soc, interval = "confidence")) 
-  # 
-  # # 3. trouts: Oncorhynchus mykiss
-  # mod.size.tunnel.trouts<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Oncorhynchus mykiss"),])
-  # CI.tunneltrouts<-confint(mod.size.tunnel.trouts)
-  # # plot(mod.size.tunnel.trouts)
-  # data.pred.CI.tunnel.trouts<-as.data.frame(predict(mod.size.tunnel.trouts, interval = "confidence")) 
-  # 
-  # # 4. chinook: Oncorhynchus tshawytscha
-  # mod.size.tunnel.chin<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Oncorhynchus tshawytscha"),])
-  # CI.tunnelchin<-confint(mod.size.tunnel.chin)
-  # # plot(mod.size.tunnel.chin) 
-  # data.pred.CI.tunnel.chin<-as.data.frame(predict(mod.size.tunnel.chin, interval = "confidence")) 
-  # 
-  # # 5. chum: Oncorhynchus keta
-  # mod.size.tunnel.chum<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Oncorhynchus keta"),])
-  # CI.tunnelchum<-confint(mod.size.tunnel.chum)
-  # # plot(mod.size.tunnel.chum)
-  # data.pred.CI.tunnel.chum<-as.data.frame(predict(mod.size.tunnel.chum, interval = "confidence")) 
-  # 
-  # # 6. Atlantics: Salmo salar
-  # mod.size.tunnel.salar<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Salmo salar"),])
-  # CI.tunnelsalar<-confint(mod.size.tunnel.salar)
-  # # plot(mod.size.tunnel.salar)
-  # data.pred.CI.tunnel.salar<-as.data.frame(predict(mod.size.tunnel.salar, interval = "confidence")) 
-  # 
-  # # 7. coho : "Oncorhynchus kisutch"
-  # mod.size.tunnel.coho<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = data.cm.tunnel[(data.cm.tunnel$Species_latin == "Oncorhynchus kisutch"),])
-  # CI.tunnelcoho<-confint(mod.size.tunnel.coho)
-  # # plot(mod.size.tunnel.coho)
-  # data.pred.CI.tunnel.coho<-as.data.frame(predict(mod.size.tunnel.coho, interval = "confidence")) 
-  # 
-  # # summary of all fits 
-  # data.cm.tunnel.sp<-data.cm.tunnel[!(data.cm.tunnel$Species_latin == "Oncorhynchus masou"),]
-  # data.cm.tunnel.sp$Species_latin<-factor(data.cm.tunnel.sp$Species_latin)
-  # data.cm.tunnel.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   do(broom::tidy(lm(SWIM_cms~ LENGTH_cm, ., na.action=na.exclude))) %>% 
-  #   ungroup()
-  # 
-  # ## 3.4. Lab swim speeds: SWIM, UCRIT, UMAX, 1 JUMP STUDY: species-specific, cm/s ---------
-  # # ******************************************************
-  # # species specific fits, CI of models, resid plots
-  # # 1. pink : "Oncorhynchus gorbuscha"
-  # mod.size.Lab.pink<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus gorbuscha"),])
-  # CI.Labpink<-confint(mod.size.Lab.pink)
-  # # plot(mod.size.Lab.pink)
-  # data.pred.CI.Lab.pink<-as.data.frame(predict(mod.size.Lab.pink, interval = "confidence"))
-  # 
-  # # 2. sockeye: Oncorhynchus nerka
-  # mod.size.Lab.soc<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus nerka"),])
-  # CI.Labsoc<-confint(mod.size.Lab.soc)
-  # # plot(mod.size.Lab.soc)
-  # data.pred.CI.Lab.soc<-as.data.frame(predict(mod.size.Lab.soc, interval = "confidence"))
-  # 
-  # # 3. trouts: Oncorhynchus mykiss
-  # mod.size.Lab.trouts<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus mykiss"),])
-  # CI.Labtrouts<-confint(mod.size.Lab.trouts)
-  # # plot(mod.size.Lab.trouts)
-  # data.pred.CI.Lab.trouts<-as.data.frame(predict(mod.size.Lab.trouts, interval = "confidence"))
-  # 
-  # # 4. chinook: Oncorhynchus tshawytscha
-  # mod.size.Lab.chin<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus tshawytscha"),])
-  # CI.Labchin<-confint(mod.size.Lab.chin)
-  # # plot(mod.size.Lab.chin)
-  # data.pred.CI.Lab.chin<-as.data.frame(predict(mod.size.Lab.chin, interval = "confidence"))
-  # 
-  # # 5. chum: Oncorhynchus keta
-  # mod.size.Lab.chum<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus keta"),])
-  # CI.Labchum<-confint(mod.size.Lab.chum)
-  # # plot(mod.size.Lab.chum)
-  # data.pred.CI.Lab.chum<-as.data.frame(predict(mod.size.Lab.chum, interval = "confidence"))
-  # 
-  # # 6. Atlantics: Salmo salar
-  # mod.size.Lab.salar<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Salmo salar"),])
-  # CI.Labsalar<-confint(mod.size.Lab.salar)
-  # # plot(mod.size.Lab.salar)
-  # data.pred.CI.Lab.salar<-as.data.frame(predict(mod.size.Lab.salar, interval = "confidence"))
-  # 
-  # # 7. coho : "Oncorhynchus kisutch"
-  # mod.size.Lab.coho<-lm(SWIM_cms~ LENGTH_cm, na.action=na.exclude, data = dataLab[(dataLab$Species_latin == "Oncorhynchus kisutch"),])
-  # CI.Labcoho<-confint(mod.size.Lab.coho)
-  # # plot(mod.size.Lab.coho)
-  # data.pred.CI.Lab.coho<-as.data.frame(predict(mod.size.Lab.coho, interval = "confidence"))
-  # 
-  # # summary of all fits 
-  # dataLab.sp<-dataLab[!(dataLab$Species_latin == "Oncorhynchus masou"),]
-  # dataLab.sp$Species_latin<-factor(dataLab.sp$Species_latin)
-  # dataLab.sp %>%
-  #   dplyr::group_by(Species_latin) %>%
-  #   do(broom::tidy(lm(SWIM_cms~ LENGTH_cm, ., na.action=na.exclude))) %>% 
-  #   ungroup()
-  # 
-  # # ******************************************************
-  # # *********** END **************************************
-  # 
-  # 
-  # 
-  # ## 4. Function use (species specific, get CI, predicted data, plots) ------------
-  # species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus gorbuscha"),],
-  #                    model=mod.size.field.pink,
-  #                    species="Oncorhynchus gorbuscha",
-  #                    sum.file=size.sum.field, 
-  #                    test = "field")
-  # species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus tshawytscha"),],
-  #                    model=mod.size.field.chin,
-  #                    species="Oncorhynchus tshawytscha",
-  #                    sum.file=size.sum.field,
-  #                    test = "field")
-  # species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus nerka"),],
-  #                    model=mod.size.field.soc,
-  #                    species="Oncorhynchus nerka",
-  #                    sum.file=size.sum.field,
-  #                    test = "field")
-  # species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus mykiss"),],
-  #                    model=mod.size.field.trouts,
-  #                    species="Oncorhynchus mykiss",
-  #                    sum.file=size.sum.field,
-  #                    test = "field")
-  # species.size.plots(dd=data.cm.field[(data.cm.field$Species_latin == "Oncorhynchus keta"),],
-  #                    model=mod.size.field.chum,
-  #                    species="Oncorhynchus keta",
-  #                    sum.file=size.sum.field)
-  # 
-  # # # Lab temp only, (standardised size, no size)
-  # # species.temp.size.fits(species = "Oncorhynchus gorbuscha", 
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw",
-  # #                    scale.fish.size = T,)
-  # # species.temp.size.fits(species = "Oncorhynchus nerka",
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw", scale.fish.size = T)
-  # # species.temp.size.fits(species = "Oncorhynchus kisutch",
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw",scale.fish.size = T)
-  # # species.temp.size.fits(species = "Salmo salar",
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw",scale.fish.size = T)
-  # # species.temp.size.fits(species = "Oncorhynchus mykiss",
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw",scale.fish.size = T)
-  # # species.temp.size.fits(species = "Oncorhynchus tshawytscha",
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw",scale.fish.size = T)
-  # # species.temp.size.fits(species = "Oncorhynchus keta",
-  # #                    temp.sum = temp.sumI, 
-  # #                    dataform = "raw",scale.fish.size = T)
-  # # 
-  # 
-  # ## [ Plot: Not used ] Tunnel tests, swim size ------
-  # p1.cm<-ggplot(data=data.cm.tunnel, aes(y=SWIM_cms, x=LENGTH_cm, fill=Species_latin,
-  #                                        colour=Species_latin,
-  #                                        label=Reference_number_1))+
-  #   scale_color_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
-  #                      labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
-  #                      values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-  #   scale_fill_manual(breaks = c("Oncorhynchus spp.","Oncorhynchus gorbuscha","Oncorhynchus keta","Oncorhynchus kisutch","Oncorhynchus nerka","Oncorhynchus tshawytscha","Salmo salar", "Oncorhynchus masou", "Oncorhynchus mykiss"),
-  #                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"), 
-  #                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
-  #   geom_errorbar(aes(ymin=SWIM_cms-SWIM_cms_SD,
-  #                     ymax=SWIM_cms+SWIM_cms_SD), size =0.2, alpha=0.6)+
-  #   geom_errorbarh(aes(xmin=LENGTH_cm-Length_error,
-  #                      xmax=LENGTH_cm+Length_error), size =0.2, alpha=0.4)+
-  #   geom_point(size=2, alpha=0.4)+
-  #   geom_hline(yintercept = 250, color = "grey", size=0.3, lty=2)+
-  #   scale_shape_manual(values = c(21,23))+
-  #   geom_text(mapping = aes( x =31, y = 230), label = "Ucrit & Umax", color = "black", size=4.5)+
-  #   geom_line(aes(y=fit.mod.ALL2, x=LENGTH_cm), size=2)+
-  #   geom_line(aes(y=fit.mod.ALL2, x=LENGTH_cm), color = "black", size=0.6)+
-  #   xlim(15, 100)+
-  #   ylim(0, 260)
-  # ggformat(p1.cm, print=F, y_title = "Swim speed (cm/s)", x_title = "Body length (cm)", title ="")
-  # p1.cm<-p1.cm+theme(legend.position = "none")
-  # # p1.cm
-  # # p1.cm<-ggMarginal(p1.cm, groupColour = TRUE, groupFill = TRUE,  type = "histogram", alpha = 1,
-  # #            yparams = list(),  xparams = list(binwidth = 3))

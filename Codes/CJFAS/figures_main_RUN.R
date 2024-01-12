@@ -132,66 +132,66 @@ cm.BL.RIDGE.s<-
   scale_x_continuous(breaks = c(0, 100, 200, 400, 700, 1000),
                      labels = c("0\n 0", "100\n1", "200\n2", "400\n4", "700\n7", "1000 cm/s \n10 BL/s"))+
   theme_minimal()+
-  annotate(geom = "text", y = 8.6, x = 1065, hjust = 0, color = "#64B0BC", size = 2.7,
+  annotate(geom = "text", y = 8.6, x = 1065, hjust = 0, color = "#64B0BC", size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Salmo salar", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Salmo salar",])) * ")"))+
-  annotate(geom = "text", y = 8.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 8.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Salmo salar", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Salmo salar",])) * ")"))+
   
-  annotate(geom = "text", y = 7.6, x = 1065, hjust = 0, color = "#70Af81",  size = 2.7,
+  annotate(geom = "text", y = 7.6, x = 1065, hjust = 0, color = "#70Af81",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus tshawytscha", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus tshawytscha",])) * ")"))+
-  annotate(geom = "text", y = 7.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 7.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus tshawytscha", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus tshawytscha",])) * ")"))+
   
-  annotate(geom = "text", y = 6.6, x = 1065, hjust = 0, color = "#EA573D",  size = 2.7,
+  annotate(geom = "text", y = 6.6, x = 1065, hjust = 0, color = "#EA573D",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus nerka", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus nerka",])) * ")"))+
-  annotate(geom = "text", y = 6.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 6.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus nerka", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus nerka",])) * ")"))+
  
-  annotate(geom = "text", y = 5.6, x = 1065, hjust = 0, color = "#615B70",  size = 2.7,
+  annotate(geom = "text", y = 5.6, x = 1065, hjust = 0, color = "#615B70",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus mykiss", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus mykiss",])) * ")"))+
-  annotate(geom = "text", y = 5.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 5.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus mykiss", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus mykiss",])) * ")"))+
  
-  annotate(geom = "text", y = 4.6, x = 1065, hjust = 0, color = "#446699",  size = 2.7,
+  annotate(geom = "text", y = 4.6, x = 1065, hjust = 0, color = "#446699",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus masou", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus masou",])) * ")"))+
-  annotate(geom = "text", y = 4.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 4.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus masou", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus masou",])) * ")"))+
   
-  annotate(geom = "text", y = 3.6, x = 1065, hjust = 0, color = "#FBC063",  size = 2.7,
+  annotate(geom = "text", y = 3.6, x = 1065, hjust = 0, color = "#FBC063",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus kisutch", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus kisutch",])) * ")"))+
-  annotate(geom = "text", y = 3.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 3.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus kisutch", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus kisutch",])) * ")"))+
  
-  annotate(geom = "text", y = 2.6, x = 1065, hjust = 0, color = "#FB9A62",  size = 2.7,
+  annotate(geom = "text", y = 2.6, x = 1065, hjust = 0, color = "#FB9A62",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus keta", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus keta",])) * ")"))+
-  annotate(geom = "text", y = 2.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 2.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus keta", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus keta",])) * ")"))+
  
-  annotate(geom = "text", y = 1.6, x = 1065, hjust = 0, color = "#D292CD",  size = 2.7,
+  annotate(geom = "text", y = 1.6, x = 1065, hjust = 0, color = "#D292CD",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus gorbuscha", "SWIM_cms"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$SWIM_cms) & data$Species_latin == "Oncorhynchus gorbuscha",])) * ")"))+
-  annotate(geom = "text", y = 1.2, x = 1065, hjust = 0, color = "black",  size = 2.7,
+  annotate(geom = "text", y = 1.6, x = 700, hjust = 0, color = "black",  size = 3.2,
            label = bquote("Max = " ~ .(round(max(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus gorbuscha", "swim_speed_MEAN_BL_s"], na.rm = TRUE),2)) ~
                             "(" * .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s) & data$Species_latin == "Oncorhynchus gorbuscha",])) * ")"))+
   scale_y_discrete(expand = expansion(add = c(0, 1.05)))+
-  theme(plot.title=element_text(size=16,face="bold"),
-        axis.text.y=element_text(hjust=1,vjust = 1, face="bold.italic"),
+  theme(plot.title=element_text(size=16),
+        axis.text.y=element_text(hjust=1,vjust = 1, face="italic", size = 12),
         axis.ticks.y=element_blank(),
-        axis.text.x=element_text(face="bold"),
+        axis.text.x=element_text( size = 14),
         axis.title.y=element_blank(),
         legend.position = "none", 
         strip.background = element_blank())
@@ -204,20 +204,20 @@ cm.BL.RIDGE<-ggplot(data=data, aes(x = SWIM_cms))+
   geom_density(alpha = 0.7, color = "black", fill = "#D5CABD")+
   ylab('Relative Density of Data')+
   annotate(geom = "text", x = 500, y = 0.009, hjust = 0,
-           label = bquote("Relative swim speeds BL/s (n = " ~ .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s),])) ~ ")"),
-           color = "#5c4d3b", fontface = "bold")+
+           label = bquote("Relative swim speeds BL/s (n = " ~ .(nrow(data[!is.na(data$swim_speed_MEAN_BL_s),])) * ")"),
+           color = "#5c4d3b", fontface = "bold", size = 4)+
   annotate(geom = "text", x = 500, y = 0.008, hjust = 0,
-           label = bquote("Absolute swim speeds cm/s (n = " ~ .(nrow(data[!is.na(data$SWIM_cms),])) ~ ")"),
-           color = "black", fontface = "bold")+
+           label = bquote("Absolute swim speeds cm/s (n = " ~ .(nrow(data[!is.na(data$SWIM_cms),])) * ")"),
+           color = "black", fontface = "bold", size = 4)+
   scale_x_continuous(breaks = c(0, 100, 200, 400,700, 1000),
                      labels = c("0\n 0", "100\n1", "200\n2", "400\n4", "700\n7", "1000 cm/s \n10 BL/s"))+
   theme_minimal()+
   theme(plot.title=element_text(size=16,face="bold"),
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank(),
-        axis.text.x=element_text(face="bold"),
+        axis.text.x=element_text( size = 14),
         axis.title.x=element_blank(),
-        axis.title.y=element_text(face="bold"),
+        axis.title.y=element_text( size = 14),
         legend.position = "none", 
         strip.background = element_blank())
 cm.BL.RIDGE
@@ -229,7 +229,7 @@ cowplot::plot_grid(cm.BL.RIDGE, cm.BL.RIDGE.s,
                    label_y = c(0.98, 0.98),
                    rel_widths = c(0.5, 1.5)) %>% 
   ggsave(filename = "./ms_exports/Figures/Fig4_manuscript.png",
-         width = 7, height = 6,units = "in")
+         width = 7.5, height = 6,units = "in")
 
 ## Fig 5: swim performance by test --------------
 
@@ -260,8 +260,8 @@ test_condBL<-ggplot(data = data[!is.na(data$Test_performance2),],
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
   scale_y_continuous(limits = c(-0.41, 15), breaks = c(0, 3, 6, 9, 12, 15) )+
-  geom_text(mapping = aes( x = factor(Test_performance2, levels = level_orderTest),fill=NULL, y = -0.3, label = label), color = "black", size=3, data = dd.label.BL)
-ggformat(test_condBL, title = "", y_title = "Swim speed (BL/s)", x_title = "", print = F, size_text = 13)
+  geom_text(mapping = aes( x = factor(Test_performance2, levels = level_orderTest),fill=NULL, y = -0.3, label = label), color = "black", size=4, data = dd.label.BL)
+ggformat(test_condBL, title = "", y_title = "Swim speed (BL/s)", x_title = "", print = F, size_text = 14)
 test_condBL <-test_condBL + theme( #legend.position = "none")
                                       legend.title = element_blank(),
                                       legend.position = "none",
@@ -279,12 +279,12 @@ test_condcm<-ggplot(data = data[!is.na(data$Test_performance2),],
                     labels = c("Oncorhynchus spp.", "O. gorbuscha", "O. keta", "O. kisutch", "O. nerka", "O. tshawytscha", "S. salar", "O. masou", "O. mykiss"),
                     values = c("grey", "#D292CD", "#FB9A62", "#FBC063", "#EA573D", "#70Af81", "#64B0BC","#446699", "#615B70"))+
   scale_y_continuous(limits = c(-50, 850) )+
-  geom_text(mapping = aes( x = factor(Test_performance2, levels = level_orderTest),fill=NULL, y = -50, label = label), color = "black", size=3, data = dd.label.cm)
-ggformat(test_condcm, title = "", y_title = "Swim speed (cm/s)", x_title = "", print = F, size_text = 13)
+  geom_text(mapping = aes( x = factor(Test_performance2, levels = level_orderTest),fill=NULL, y = -50, label = label), color = "black", size=4, data = dd.label.cm)
+ggformat(test_condcm, title = "", y_title = "Swim speed (cm/s)", x_title = "", print = F, size_text = 14)
 test_condcm <-test_condcm + theme( #legend.position = "none")
                                       legend.title = element_blank(),
                                       legend.position = c(0.18,0.72),
-                                      legend.text = element_text(face = "italic", size = 9),
+                                      legend.text = element_text(face = "italic", size = 10),
                                       legend.key.size = unit(0.4, "cm"))
 
 cowplot::plot_grid( test_condcm, test_condBL,
@@ -293,7 +293,7 @@ cowplot::plot_grid( test_condcm, test_condBL,
                     label_x = c(0.17, 0.17),
                     label_y = c(0.9)) %>%
   ggsave(filename = "./ms_exports/Figures/Fig8_cms_SwimTest.png",
-         width = 9.5, height = 5,units = "in")
+         width = 9, height = 4,units = "in")
 
 
 ## Misc Fig. [cm/s] Scaling of swimming --------

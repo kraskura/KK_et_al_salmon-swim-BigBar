@@ -33,9 +33,10 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
         geom_ribbon(aes(ymin = pred.modCI.l,
                         ymax = pred.modCI.h, size = NULL))+
         geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
-        ylim(0, 120)+
-        scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
-      ggformat(plot.sp.t, print=F, y_title = "Normalized Swim speed (%, cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 12)
+        scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))+
+        ylim(0, 120)
+        
+      ggformat(plot.sp.t, print=F, y_title = "Normalized Swim speed (%, cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 14)
       plot.sp.t<-plot.sp.t+theme(legend.position = "none")
       # p2.cmNorm0
       
@@ -116,9 +117,10 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
         geom_ribbon(data=dd_pred, aes(y = NULL, ymin = pred.modCI.l,
                         ymax = pred.modCI.h,  fill=Species_latin, colour=Species_latin, group = Species_latin ), alpha = 0.3)+
         geom_line(data=dd_pred, aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
-        coord_cartesian(ylim = c(ylim_low, ylim_high), xlim = c(0,100)) +
+        coord_cartesian(ylim = c(ylim_low, ylim_high)) +
         scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
-      ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 10)
+      
+      ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 14)
       plot.sp.t<-plot.sp.t + theme(legend.position = "none", 
                                    plot.margin = margin(t = -0.5, unit="cm", r = 0, l = 0.1))
       
@@ -146,7 +148,7 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
       scale_x_continuous(limits = c(30, 100), breaks = c(30, 40, 50, 60, 70, 80, 90))+
       coord_cartesian(ylim = c(ylim_low, ylim_high)) +
       geom_text(mapping = aes( x = 45, y = ylim_high-10), label = data.subsetID, color = "black", size=4.5)
-      ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 12)
+      ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 14)
       plot.sp.s<-plot.sp.s+theme(legend.position = "none")
       
       assign(paste(gsub(x=species,pattern = " ",replacement = ""),"_dataTemp_", data.subsetID, sep=""), dd_pred, envir = .GlobalEnv)
@@ -196,7 +198,7 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
         geom_line(aes(y=pred.mod, x=Temp_test_mean), color = "black")+  
         ylim(0, 250)+
         scale_x_continuous(limits = c(3, 27), breaks = c(5, 10, 15, 20, 25))
-      ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 10)
+      ggformat(plot.sp.t, print=F, y_title = "Swim speed (cm/s)", x_title = "Temperature (ºC)", title ="", size_text = 14)
       plot.sp.t<-plot.sp.t + theme(legend.position = "none", 
                                    plot.margin = margin(t = -0.5, unit="cm", r = 0, l = 0.1))
       
@@ -222,7 +224,7 @@ species.temp.size.fits<-function(species, temp.sum, dataform, data.subset, data.
 }
 
 # only for field swim -----
-species.size.plots<-function(model, dd, species, sum.file, test = "field"){
+species.size.plots<-function(model, dsd, species, sum.file, test = "field"){
   
   data.pred.CI<-predict(model, interval = "confidence") 
   dd$pred.mod<-data.pred.CI[,1]
@@ -255,7 +257,7 @@ species.size.plots<-function(model, dd, species, sum.file, test = "field"){
       plot.sp.s<- plot.sp.s+
         geom_text(mapping = aes( x = 45, y = 965), label = "Lab", color = "black", size=4.5)
     }
-  ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 12)
+  ggformat(plot.sp.s, print=F, y_title = "Swim Speed (cm/s)", x_title = "Body length (cm)", title ="", size_text = 14)
   plot.sp.s<-plot.sp.s+theme(legend.position = "none")
   plot.sp.s
   
